@@ -1,12 +1,10 @@
 
-cnvWidth = 640;
-cnvHeight = 480;
 var gm;
 var playr;
 var foodies;
 
 function setup() {
-  gm = new game(64,48,640,480);
+  gm = new game(64,48,1000,750);
   createCanvas(gm.cnvWidth, gm.cnvHeight);
   playr = new snake(5,5);
   foodies = new Array(10);
@@ -34,8 +32,6 @@ function draw() {
   if(gm.status == "GO")
   {
     background(55);
-
-
     playr.update();
     foodies.forEach(function(entry) {
       entry.update();
@@ -65,6 +61,11 @@ class game {
     textSize(16);
     fill(0,102,153);
     text("SCORE: " + (playr.length - 1),0,15);
+    if(this.status == "LOST")
+    {
+      textSize(gm.gridWidth)
+      text("GAME OVER", gm.cnvWidth/5, gm.cnvHeight/2)
+    }
   }
 }
 
@@ -72,7 +73,7 @@ class snake {
   constructor (x, y){
    this.x = x;
    this.y = y;
-   this.direction = "UP";
+   this.direction = "DOWN";
    this.speed = 1;
    this.length = 1;
    this.tail = new Array (new Array(x,y));
@@ -98,7 +99,12 @@ class snake {
     }
     this.tail[0] = new Array(this.x,this.y);
     if(this.x < 0 || this.y < 0 || this.x > gm.gridWidth-1 || this.y > gm.gridHeight-1)
-      this.status == "LOST";
+      gm.status = "LOST";
+    for(i=1;i<this.tail.length;i++)
+    {
+      if(this.tail[0][0]==this.tail[i][0] && this.tail[0][1] == this.tail[i][1])
+        gm.status = "LOST";
+    }
   }
   draw(){
     fill('white');
