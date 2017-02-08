@@ -20,23 +20,31 @@ function setup() {
 function draw() {
   //CONTROL
   if(keyIsDown(LEFT_ARROW))
-    playr.direction = "LEFT";
+    if(playr.direction != "RIGHT")
+      playr.direction = "LEFT";
   if(keyIsDown(RIGHT_ARROW))
-    playr.direction = "RIGHT";
+    if(playr.direction != "LEFT")
+      playr.direction = "RIGHT";
   if(keyIsDown(UP_ARROW))
-    playr.direction = "UP";
+    if(playr.direction != "DOWN")
+      playr.direction = "UP";
   if(keyIsDown(DOWN_ARROW))
-    playr.direction = "DOWN";
+    if(playr.direction != "UP")
+      playr.direction = "DOWN";
+  if(gm.status == "GO")
+  {
+    background(55);
 
-  background(55);
 
+    playr.update();
+    foodies.forEach(function(entry) {
+      entry.update();
+      entry.draw();
+    }, this);
+    playr.draw();
+  }
+  gm.draw();
 
-  playr.update();
-  foodies.forEach(function(entry) {
-    entry.update();
-    entry.draw();
-  }, this);
-  playr.draw();
 }
 
 class game {
@@ -45,12 +53,18 @@ class game {
     this.gridHeight = gridHeight;
     this.cnvWidth = cnvWidth;
     this.cnvHeight = cnvHeight;
+    this.status = "GO";
   }
   get xscale() {
     return this.cnvWidth/this.gridWidth;
   }
   get yscale() {
     return this.cnvHeight/this.gridHeight;
+  }
+  draw(){
+    textSize(16);
+    fill(0,102,153);
+    text("SCORE: " + (playr.length - 1),0,15);
   }
 }
 
@@ -78,12 +92,13 @@ class snake {
         this.x=this.x+this.speed;
         break;
     }
-    console.log("Snake location:" + this.length + " " + this.x + ", " + this.y + "   " + this.tail[0] + " " + this.tail[1] + " " + this.tail[2] + " " + this.tail[3]);
     for(i=this.length-1;i>0;i--)
     {
         this.tail[i] = this.tail[i-1];
     }
     this.tail[0] = new Array(this.x,this.y);
+    if(this.x < 0 || this.y < 0 || this.x > gm.gridWidth-1 || this.y > gm.gridHeight-1)
+      this.status == "LOST";
   }
   draw(){
     fill('white');
@@ -105,7 +120,6 @@ class foodie {
   }
   update(){
     if(this.x == playr.x && this.y == playr.y){
-      console.log("nom!");
       this.x = (floor(random()*gm.gridWidth));
       this.y = (floor(random()*gm.gridHeight));
       playr.length++;
