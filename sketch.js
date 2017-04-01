@@ -143,13 +143,13 @@ class snake {
     var scaledx = this.x*gm.xscale;
     var scaledy = this.y*gm.yscale;
     if(this.direction == "RIGHT") 
-      triangle(scaledx,scaledy,scaledx,scaledy+gm.yscale,scaledx+gm.xscale,scaledy+gm.yscale/2);
+      quad(scaledx,scaledy,scaledx,scaledy+gm.yscale,scaledx+gm.xscale,scaledy+2*gm.yscale/3,scaledx+gm.xscale,scaledy+gm.yscale/3);
     else if(this.direction == "LEFT")
-      triangle(scaledx+gm.xscale,scaledy,scaledx+gm.xscale,scaledy+gm.yscale,scaledx,scaledy+gm.yscale/2);
+      quad(scaledx+gm.xscale,scaledy,scaledx+gm.xscale,scaledy+gm.yscale,scaledx,scaledy+2*gm.yscale/3,scaledx,scaledy+gm.yscale/3);
     else if(this.direction == "DOWN")
-      triangle(scaledx,scaledy,scaledx+gm.xscale,scaledy,scaledx+gm.xscale/2,scaledy+gm.yscale);
+      quad(scaledx,scaledy,scaledx+gm.xscale,scaledy,scaledx+2*gm.xscale/3,scaledy+gm.yscale,scaledx+gm.xscale/3,scaledy+gm.yscale);
     else if(this.direction == "UP")
-      triangle(scaledx,scaledy+gm.yscale,scaledx+gm.xscale,scaledy+gm.yscale,scaledx+gm.xscale/2,scaledy);
+      quad(scaledx,scaledy+gm.yscale,scaledx+gm.xscale,scaledy+gm.yscale,scaledx+2*gm.xscale/3,scaledy, scaledx+gm.xscale/3,scaledy);
   }
 }
 
@@ -157,9 +157,10 @@ class foodie {
   constructor (){
     this.x = (floor(random()*gm.gridWidth));
     this.y = (floor(random()*gm.gridHeight));
+    this.color = [random()*255,random()*255,random()*255];
   }
   draw(){ 
-    fill('red');
+    fill(this.color);
     rect(this.x*gm.xscale,this.y*gm.yscale,gm.xscale,gm.yscale);
   }
   update(){
@@ -171,7 +172,7 @@ class foodie {
     var numberOfGiblets = floor(random()*11+5);
     for(i=0;i<numberOfGiblets;i++)
     {
-      foodieGiblets.push(new foodieGiblet(this.x,this.y,'red'));
+      foodieGiblets.push(new foodieGiblet(this.x,this.y,this.color));
     }
     this.x = (floor(random()*gm.gridWidth));
     this.y = (floor(random()*gm.gridHeight));
