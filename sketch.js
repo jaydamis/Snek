@@ -12,6 +12,7 @@ function setup() {
   {
     foodies[i] = new foodie();
   }
+  foodieGiblets = [];
   frameRate(20);
 }
 
@@ -134,10 +135,26 @@ class foodie {
   }
   update(){
     if(this.x == playr.x && this.y == playr.y){
-      this.x = (floor(random()*gm.gridWidth));
-      this.y = (floor(random()*gm.gridHeight));
-      playr.length++;
+      this.getEaten();
     }
   }
+  getEaten(){
+    var numberOfGiblets = floor(random()*6+5);
+    for(i=0;i<=numberOfGiblets;i++)
+    {
+      
+    }
+    this.x = (floor(random()*gm.gridWidth));
+    this.y = (floor(random()*gm.gridHeight));
+    playr.length++;
+  }
+}
 
+class foodieGiblet {
+  constructor (x,y,color){
+    this.direction
+    this.x = x;
+    this.y = y;
+    this.color = color;
+  }  
 }
