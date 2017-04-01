@@ -3,6 +3,8 @@ var gm;
 var playr;
 var foodies;
 
+//var gameState = {GO : 1, NO : 2};
+
 function setup() {
   gm = new game(96,48,window.innerWidth,window.innerHeight);
   createCanvas(gm.cnvWidth, gm.cnvHeight);
@@ -18,14 +20,7 @@ function setup() {
 
 function keyPressed()
 {
-  if(keyCode == 32){
-    if(gm.status == "GO")
-      gm.status = "PAUSED";
-    else if(gm.status == "PAUSED")
-      gm.status = "GO";
-    else if(gm.status == "LOST")
-      gm.reset();
-  }
+
   if(gm.status == "GO"){
     if(keyIsDown(LEFT_ARROW))
       if(playr.direction != "RIGHT")
@@ -40,9 +35,34 @@ function keyPressed()
       if(playr.direction != "UP")
         playr.direction = "DOWN";
   }
+
+
   if(gm.status == "PAUSED")
   {
-    //if()
+    if(keyIsDown(UP_ARROW)){
+      gm.pauseMenuSelection.push(gm.pauseMenuSelection.shift());
+    }
+    if(keyIsDown(DOWN_ARROW)){
+      gm.pauseMenuSelection.unshift(gm.pauseMenuSelection.pop());
+    }
+    if(keyIsDown(32)){
+      for(i=0;i<gm.pauseMenuSelection.length;i++){
+        if(gm.pauseMenuSelection[i])
+          gm.pauseMenuFunctions[i]();
+      }
+    }
+  }
+  else if(gm.status == "SETTINGS")
+  {
+    
+  }
+  else if(keyCode == 32){
+    if(gm.status == "GO")
+      gm.status = "PAUSED";
+    else if(gm.status == "PAUSED")
+      gm.status = "GO";
+    else if(gm.status == "LOST")
+      gm.reset();
   }
 }
 
@@ -76,6 +96,12 @@ class game {
     this.status = "GO";
     this.background = [120,120,120];
     this.backgroundChangeRate = [20,20,20];
+    this.pauseMenuSelection = [1,0,0];
+    this.pauseMenuFunctions = [
+      function() { gm.status = "GO";},
+      function() { gm.status = "SETTINGS";},
+      function() { window.close();}
+    ];
   }
   get xscale() {
     return this.cnvWidth/this.gridWidth;
@@ -117,9 +143,24 @@ class game {
       text("GAME OVER", gm.cnvWidth/3.5, gm.cnvHeight/2)
   }
   drawPauseMenu(){
+    fill(20);
+    rect(gm.cnvWidth/4,gm.cnvHeight/5,gm.cnvWidth/2,gm.cnvHeight/2)
+    fill(0,102,153);
     textAlign(CENTER);
     textSize(gm.cnvWidth/15);
-    text("PAUSED", gm.cnvWidth/2,gm.cnvHeight/2);
+    text("PAUSED", gm.cnvWidth/2,gm.cnvHeight/3);
+    this.drawMenuItem("Resume Snekking",1);
+    this.drawMenuItem("Snek Settings",2)
+    this.drawMenuItem("Quit Snekking",3);
+
+  }
+  drawMenuItem(textual,menuPosition){
+    textSize(gm.cnvWidth/30);
+    if(gm.pauseMenuSelection[menuPosition-1])
+      fill(120,120,30);
+    else
+      fill(0,102,153);
+    text(textual, gm.cnvWidth/2, gm.cnvHeight/3 + menuPosition*gm.cnvHeight/12);
   }
   reset(){
     setup();
