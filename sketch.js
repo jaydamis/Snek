@@ -4,7 +4,6 @@ var playr;
 var foodies;
 
 function setup() {
-  
   gm = new game(96,48,window.innerWidth,window.innerHeight);
   createCanvas(gm.cnvWidth, gm.cnvHeight);
   playr = new snake(1,1);
@@ -41,13 +40,14 @@ function draw() {
       entry.draw();
     }, this);
     playr.draw();
-    foodieGiblets.forEach(function(entry){
-      entry.update();
-      entry.draw();
+    foodieGiblets.forEach(function(item, index, object){
+      item.update();
+      item.draw();
+      if(item.deleteMe)
+        foodieGiblets.splice(index,1);
     }, this);
   }
   gm.draw();
-
 }
 
 class game {
@@ -144,14 +144,6 @@ class snake {
       if(i+1==this.tail.length){
         this.drawTail(this.tail[i][0],this.tail[i][1],'black',this.tail[i-1]);
       }
-      // else if(colorSlot == 0)
-      //   this.drawBody(this.tail[i][0],this.tail[i][1],'red');
-      // else if(colorSlot == 1)
-      //   this.drawBody(this.tail[i][0],this.tail[i][1],'yellow');
-      // else if(colorSlot == 2)
-      //   this.drawBody(this.tail[i][0],this.tail[i][1],'red');
-      // else
-      //   this.drawBody(this.tail[i][0],this.tail[i][1],'black');
       else
         this.drawBody(this.tail[i][0],this.tail[i][1],this.bodyColors[colorSlot]);
     }
@@ -209,6 +201,7 @@ class foodie {
     this.x = (floor(random()*gm.gridWidth));
     this.y = (floor(random()*gm.gridHeight));
     this.color = [random()*255,random()*255,random()*255];
+    this.gibletQtyRange = [100,500];
   }
   draw(){ 
     fill(this.color);
@@ -220,7 +213,7 @@ class foodie {
     }
   }
   getEaten(){
-    var numberOfGiblets = floor(random()*11+5);//10-15;
+    var numberOfGiblets = floor(random()*(this.gibletQtyRange[1]-this.gibletQtyRange[0]) +this.gibletQtyRange[0]);//10-15;
     for(i=0;i<numberOfGiblets;i++)
     {
       foodieGiblets.push(new foodieGiblet(this.x,this.y,this.color));
@@ -252,7 +245,7 @@ class foodieGiblet {
     this.x = this.x + Math.cos(this.direction)*this.speed;
     this.y = this.y + Math.sin(this.direction)*this.speed;
     this.angle = this.angle += this.rotateSpeed;
-    this.deleteMe = this.isOffScreen();
+    this.deleteMe = this.isOffScreen();      
   }
   isOffScreen(){
     if(this.x < 0 || this.y < 0 || this.x > gm.cnvWidth || this.y > gm.cnvHeight){
