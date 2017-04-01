@@ -16,20 +16,37 @@ function setup() {
   frameRate(20);
 }
 
+function keyPressed()
+{
+  if(keyCode == 32){
+    if(gm.status == "GO")
+      gm.status = "PAUSED";
+    else if(gm.status == "PAUSED")
+      gm.status = "GO";
+    else if(gm.status == "LOST")
+      gm.reset();
+  }
+  if(gm.status == "GO"){
+    if(keyIsDown(LEFT_ARROW))
+      if(playr.direction != "RIGHT")
+        playr.direction = "LEFT";
+    if(keyIsDown(RIGHT_ARROW))
+      if(playr.direction != "LEFT")
+        playr.direction = "RIGHT";
+    if(keyIsDown(UP_ARROW))
+      if(playr.direction != "DOWN")
+        playr.direction = "UP";
+    if(keyIsDown(DOWN_ARROW))
+      if(playr.direction != "UP")
+        playr.direction = "DOWN";
+  }
+  if(gm.status == "PAUSED")
+  {
+    //if()
+  }
+}
+
 function draw() {
-  //CONTROL
-  if(keyIsDown(LEFT_ARROW))
-    if(playr.direction != "RIGHT")
-      playr.direction = "LEFT";
-  if(keyIsDown(RIGHT_ARROW))
-    if(playr.direction != "LEFT")
-      playr.direction = "RIGHT";
-  if(keyIsDown(UP_ARROW))
-    if(playr.direction != "DOWN")
-      playr.direction = "UP";
-  if(keyIsDown(DOWN_ARROW))
-    if(playr.direction != "UP")
-      playr.direction = "DOWN";
   if(gm.status == "GO")
   {
     gm.updateBackground();
@@ -72,6 +89,10 @@ class game {
     {
       this.drawGameOver();
     }
+    if(this.status == "PAUSED")
+    {
+      this.drawPauseMenu();
+    }
   }
   updateBackground(){
     for(i=0;i<3;i++){
@@ -95,6 +116,14 @@ class game {
       textSize(gm.cnvWidth/15)
       text("GAME OVER", gm.cnvWidth/3.5, gm.cnvHeight/2)
   }
+  drawPauseMenu(){
+    textAlign(CENTER);
+    textSize(gm.cnvWidth/15);
+    text("PAUSED", gm.cnvWidth/2,gm.cnvHeight/2);
+  }
+  reset(){
+    setup();
+  }
 }
 
 class snake {
@@ -106,7 +135,6 @@ class snake {
    this.length = 1;
    this.tail = new Array (new Array(x,y));
    this.bodyColors = ['yellow','red','red','yellow','black','black'];
-   //this.bodyColors = ['red','yellow','red','black'];
   }
   update(){
     switch(this.direction){
@@ -201,7 +229,8 @@ class foodie {
     this.x = (floor(random()*gm.gridWidth));
     this.y = (floor(random()*gm.gridHeight));
     this.color = [random()*255,random()*255,random()*255];
-    this.gibletQtyRange = [100,500];
+    this.gibletQtyRange = [10,15];
+    this.iteration = 0;
   }
   draw(){ 
     fill(this.color);
@@ -240,11 +269,13 @@ class foodieGiblet {
     this.size = (gm.xscale+gm.yscale)/((2)*(1+random()));
     this.rotateSpeed = (1+random()*8)*Math.PI/6;
     this.angle = random()*2*Math.PI;
+    this.iteration = 0;
   }  
   update() {
     this.x = this.x + Math.cos(this.direction)*this.speed;
     this.y = this.y + Math.sin(this.direction)*this.speed;
     this.angle = this.angle += this.rotateSpeed;
+    this.iteration = this.iteration + this.speed*10;
     this.deleteMe = this.isOffScreen();      
   }
   isOffScreen(){
@@ -261,8 +292,15 @@ class foodieGiblet {
     translate(this.x,this.y);
     rotate(this.angle);
     rect(0,0,this.size,this.size);
+    //this.drawSillyCircle();
     pop();
     rectMode(CORNER);
+  }
+  drawSillyCircle(){
+    noFill();
+    stroke(this.color);
+    strokeWeight(2);
+    ellipse(0,0,this.iteration,this.iteration);
   }
 }
 
