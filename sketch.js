@@ -6,7 +6,7 @@ var foodies;
 function setup() {
   gm = new game(64,48,1000,750);
   createCanvas(gm.cnvWidth, gm.cnvHeight);
-  playr = new snake(5,5);
+  playr = new snake(1,1);
   foodies = new Array(10);
   for( i=0; i<foodies.length;i++)
   {
@@ -32,6 +32,7 @@ function draw() {
       playr.direction = "DOWN";
   if(gm.status == "GO")
   {
+    rectMode(CORNER);
     background(55);
     playr.update();
     foodies.forEach(function(entry) {
@@ -39,6 +40,10 @@ function draw() {
       entry.draw();
     }, this);
     playr.draw();
+    foodieGiblets.forEach(function(entry){
+      entry.update();
+      entry.draw();
+    }, this);
   }
   gm.draw();
 
@@ -129,7 +134,7 @@ class foodie {
     this.x = (floor(random()*gm.gridWidth));
     this.y = (floor(random()*gm.gridHeight));
   }
-  draw(){
+  draw(){ 
     fill('red');
     rect(this.x*gm.xscale,this.y*gm.yscale,gm.xscale,gm.yscale);
   }
@@ -139,10 +144,10 @@ class foodie {
     }
   }
   getEaten(){
-    var numberOfGiblets = floor(random()*6+5);
-    for(i=0;i<=numberOfGiblets;i++)
+    var numberOfGiblets = floor(random()*11+5);
+    for(i=0;i<numberOfGiblets;i++)
     {
-      
+      foodieGiblets.push(new foodieGiblet(this.x,this.y,'red'));
     }
     this.x = (floor(random()*gm.gridWidth));
     this.y = (floor(random()*gm.gridHeight));
@@ -152,9 +157,30 @@ class foodie {
 
 class foodieGiblet {
   constructor (x,y,color){
-    this.direction
-    this.x = x;
-    this.y = y;
+    this.direction = random()*2*Math.PI;
+    this.x = x*gm.xscale;
+    this.y = y*gm.yscale;
     this.color = color;
+    this.deleteMe = false;
+    this.speed = gm.cnvWidth / 30;
+    this.size = (gm.xscale+gm.yscale)/((2)*(1+random()));
   }  
+  update() {
+    this.x = this.x + Math.cos(this.direction)*this.speed;
+    this.y = this.y + Math.sin(this.direction)*this.speed;
+    this.deleteMe = this.isOffScreen();
+  }
+  isOffScreen(){
+    if(this.x < 0 || this.y < 0 || this.x > gm.cnvWidth || this.y > gm.cnvHeight){
+      return true;
+    }
+    else
+      return false;
+  }
+  draw(){
+    fill(this.color);
+    rectMode(CENTER);
+    rect(this.x,this.y,this.size,this.size);
+  }
 }
+
