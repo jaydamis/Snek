@@ -33,7 +33,7 @@ function draw() {
   if(gm.status == "GO")
   {
     rectMode(CORNER);
-    background(55);
+    background(120);
     playr.update();
     foodies.forEach(function(entry) {
       entry.update();
@@ -121,11 +121,35 @@ class snake {
     }
   }
   draw(){
-    fill('white');
-    for(i=0;i<this.tail.length;i++)
+    this.drawHead();
+    for(i=1;i<this.tail.length;i++)
     {
+      var colorSlot = (i+3)%4;
+      if(i==this.tail.length)
+        fill('black');
+      else if( colorSlot == 0)
+        fill('red');
+      else if(colorSlot == 1)
+        fill('yellow');
+      else if(colorSlot == 2)
+        fill('red');
+      else
+        fill('black');
       rect(this.tail[i][0]*gm.xscale,this.tail[i][1]*gm.yscale,gm.xscale,gm.yscale);
     }
+  }
+  drawHead(){
+    fill('black');
+    var scaledx = this.x*gm.xscale;
+    var scaledy = this.y*gm.yscale;
+    if(this.direction == "RIGHT") 
+      triangle(scaledx,scaledy,scaledx,scaledy+gm.yscale,scaledx+gm.xscale,scaledy+gm.yscale/2);
+    else if(this.direction == "LEFT")
+      triangle(scaledx+gm.xscale,scaledy,scaledx+gm.xscale,scaledy+gm.yscale,scaledx,scaledy+gm.yscale/2);
+    else if(this.direction == "DOWN")
+      triangle(scaledx,scaledy,scaledx+gm.xscale,scaledy,scaledx+gm.xscale/2,scaledy+gm.yscale);
+    else if(this.direction == "UP")
+      triangle(scaledx,scaledy+gm.yscale,scaledx+gm.xscale,scaledy+gm.yscale,scaledx+gm.xscale/2,scaledy);
   }
 }
 
