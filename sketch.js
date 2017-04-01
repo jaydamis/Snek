@@ -105,6 +105,8 @@ class snake {
    this.speed = 1;
    this.length = 1;
    this.tail = new Array (new Array(x,y));
+   this.bodyColors = ['yellow','red','red','yellow','black','black'];
+   //this.bodyColors = ['red','yellow','red','black'];
   }
   update(){
     switch(this.direction){
@@ -135,25 +137,27 @@ class snake {
     }
   }
   draw(){
-    this.drawHead();
+    this.drawHead('black');
     for(i=1;i<this.tail.length;i++)
     {
-      var colorSlot = (i+3)%4;
+      var colorSlot = (i+this.bodyColors.length-1)%this.bodyColors.length;
       if(i+1==this.tail.length){
         this.drawTail(this.tail[i][0],this.tail[i][1],'black',this.tail[i-1]);
       }
-      else if(colorSlot == 0)
-        this.drawBody(this.tail[i][0],this.tail[i][1],'red');
-      else if(colorSlot == 1)
-        this.drawBody(this.tail[i][0],this.tail[i][1],'yellow');
-      else if(colorSlot == 2)
-        this.drawBody(this.tail[i][0],this.tail[i][1],'red');
+      // else if(colorSlot == 0)
+      //   this.drawBody(this.tail[i][0],this.tail[i][1],'red');
+      // else if(colorSlot == 1)
+      //   this.drawBody(this.tail[i][0],this.tail[i][1],'yellow');
+      // else if(colorSlot == 2)
+      //   this.drawBody(this.tail[i][0],this.tail[i][1],'red');
+      // else
+      //   this.drawBody(this.tail[i][0],this.tail[i][1],'black');
       else
-        this.drawBody(this.tail[i][0],this.tail[i][1],'black');
+        this.drawBody(this.tail[i][0],this.tail[i][1],this.bodyColors[colorSlot]);
     }
   }
-  drawHead(){
-    fill('black');
+  drawHead(color){
+    fill(color);
     var scaledx = this.x*gm.xscale;
     var scaledy = this.y*gm.yscale;
     if(this.direction == "RIGHT") {
