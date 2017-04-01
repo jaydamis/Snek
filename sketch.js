@@ -151,37 +151,42 @@ class snake {
     fill('black');
     var scaledx = this.x*gm.xscale;
     var scaledy = this.y*gm.yscale;
-    if(this.direction == "RIGHT") 
-      quad(scaledx,scaledy,scaledx,scaledy+gm.yscale,scaledx+gm.xscale,scaledy+2*gm.yscale/3,scaledx+gm.xscale,scaledy+gm.yscale/3);
-    else if(this.direction == "LEFT")
-      quad(scaledx+gm.xscale,scaledy,scaledx+gm.xscale,scaledy+gm.yscale,scaledx,scaledy+2*gm.yscale/3,scaledx,scaledy+gm.yscale/3);
-    else if(this.direction == "DOWN")
-      quad(scaledx,scaledy,scaledx+gm.xscale,scaledy,scaledx+2*gm.xscale/3,scaledy+gm.yscale,scaledx+gm.xscale/3,scaledy+gm.yscale);
-    else if(this.direction == "UP")
-      quad(scaledx,scaledy+gm.yscale,scaledx+gm.xscale,scaledy+gm.yscale,scaledx+2*gm.xscale/3,scaledy, scaledx+gm.xscale/3,scaledy);
+    if(this.direction == "RIGHT") {
+      quad(scaledx,scaledy,scaledx,scaledy+gm.yscale,scaledx+gm.xscale,
+        scaledy+2*gm.yscale/3,scaledx+gm.xscale,scaledy+gm.yscale/3); }
+    else if(this.direction == "LEFT") {
+      quad(scaledx+gm.xscale,scaledy,scaledx+gm.xscale,scaledy+gm.yscale,
+        scaledx,scaledy+2*gm.yscale/3,scaledx,scaledy+gm.yscale/3); }
+    else if(this.direction == "DOWN") {
+      quad(scaledx,scaledy,scaledx+gm.xscale,scaledy,
+        scaledx+2*gm.xscale/3,scaledy+gm.yscale,scaledx+gm.xscale/3,scaledy+gm.yscale); }
+    else if(this.direction == "UP") {
+      quad(scaledx,scaledy+gm.yscale,scaledx+gm.xscale,scaledy+gm.yscale,
+        scaledx+2*gm.xscale/3,scaledy, scaledx+gm.xscale/3,scaledy); }
   }
   drawTail(x,y,color,prevSegment){
-    var tailDirection;
-    if(x > prevSegment[0])
-      tailDirection = "LEFT";
-    else if(x < prevSegment[0])
-      tailDirection = "RIGHT";
-    else if(y < prevSegment[1])
-      tailDirection = "DOWN";
-    else
-      tailDirection = "UP";
-
+    var tailDirection = this.getTailDirection(x,y,prevSegment);
     fill(color);
     var scaledx = x*gm.xscale;
     var scaledy = y*gm.yscale;
-    if(tailDirection == "LEFT") 
-      triangle(scaledx,scaledy,scaledx,scaledy+gm.yscale,scaledx+gm.xscale,scaledy+gm.yscale/2);
+    if(tailDirection == "LEFT")
+      triangle(scaledx,scaledy,scaledx,scaledy+gm.yscale,scaledx+gm.xscale,scaledy+gm.yscale/2); 
     else if(tailDirection == "RIGHT")
       triangle(scaledx+gm.xscale,scaledy,scaledx+gm.xscale,scaledy+gm.yscale,scaledx,scaledy+gm.yscale/2);
     else if(tailDirection == "UP")
       triangle(scaledx,scaledy,scaledx+gm.xscale,scaledy,scaledx+gm.xscale/2,scaledy+gm.yscale);
     else if(tailDirection == "DOWN")
       triangle(scaledx,scaledy+gm.yscale,scaledx+gm.xscale,scaledy+gm.yscale,scaledx+gm.xscale/2,scaledy);   
+  }
+  getTailDirection(x,y,prevSegment){
+    if(x > prevSegment[0])
+      return "LEFT";
+    else if(x < prevSegment[0])
+      return "RIGHT";
+    else if(y < prevSegment[1])
+      return "DOWN";
+    else
+      return "UP";
   }
   drawBody(x,y,color)
   {
@@ -206,7 +211,7 @@ class foodie {
     }
   }
   getEaten(){
-    var numberOfGiblets = floor(random()*11+5);
+    var numberOfGiblets = floor(random()*11+5);//10-15;
     for(i=0;i<numberOfGiblets;i++)
     {
       foodieGiblets.push(new foodieGiblet(this.x,this.y,this.color));
@@ -229,12 +234,15 @@ class foodieGiblet {
     this.y = y*gm.yscale;
     this.color = color;
     this.deleteMe = false;
-    this.speed = gm.cnvWidth / 30;
+    this.speed = (gm.cnvWidth / 50)*(random()/2 +.5);
     this.size = (gm.xscale+gm.yscale)/((2)*(1+random()));
+    this.rotateSpeed = (1+random()*8)*Math.PI/6;
+    this.angle = random()*2*Math.PI;
   }  
   update() {
     this.x = this.x + Math.cos(this.direction)*this.speed;
     this.y = this.y + Math.sin(this.direction)*this.speed;
+    this.angle = this.angle += this.rotateSpeed;
     this.deleteMe = this.isOffScreen();
   }
   isOffScreen(){
@@ -247,7 +255,11 @@ class foodieGiblet {
   draw(){
     fill(this.color);
     rectMode(CENTER);
-    rect(this.x,this.y,this.size,this.size);
+    push();
+    translate(this.x,this.y);
+    rotate(this.angle);
+    rect(0,0,this.size,this.size);
+    pop();
     rectMode(CORNER);
   }
 }
