@@ -4,7 +4,8 @@ var playr;
 var foodies;
 
 function setup() {
-  gm = new game(64,48,1000,750);
+  
+  gm = new game(96,48,window.innerWidth,window.innerHeight);
   createCanvas(gm.cnvWidth, gm.cnvHeight);
   playr = new snake(1,1);
   foodies = new Array(10);
@@ -32,8 +33,8 @@ function draw() {
       playr.direction = "DOWN";
   if(gm.status == "GO")
   {
-    rectMode(CORNER);
-    background(120);
+    gm.updateBackground();
+    background(gm.background);
     playr.update();
     foodies.forEach(function(entry) {
       entry.update();
@@ -56,6 +57,7 @@ class game {
     this.cnvWidth = cnvWidth;
     this.cnvHeight = cnvHeight;
     this.status = "GO";
+    this.background = [120,120,120];
   }
   get xscale() {
     return this.cnvWidth/this.gridWidth;
@@ -70,14 +72,21 @@ class game {
       this.drawGameOver();
     }
   }
+  updateBackground(){
+    this.background[0] = this.background[0] + floor(random()*11)-5;
+    this.background[1] = this.background[1] + floor(random()*11)-5;
+    this.background[2] = this.background[2] + floor(random()*11)-5;
+  }
 
   //Used in Draw
   drawScore(){
     textSize(gm.cnvWidth/50);
+    textAlign(LEFT);
     fill(0,102,153);
-    text("SCORE: " + (playr.length - 1),0,15);
+    text("SCORE: " + (playr.length - 1),0,0,gm.cnvWidth,100);
   }
   drawGameOver(){
+      textAlign(LEFT);
       textSize(gm.cnvWidth/15)
       text("GAME OVER", gm.cnvWidth/3.5, gm.cnvHeight/2)
   }
@@ -125,17 +134,17 @@ class snake {
     for(i=1;i<this.tail.length;i++)
     {
       var colorSlot = (i+3)%4;
-      if(i==this.tail.length)
-        fill('black');
-      else if( colorSlot == 0)
-        fill('red');
+      if(i+1==this.tail.length){
+        this.drawTail(this.tail[i][0],this.tail[i][1],'black',this.tail[i-1]);
+      }
+      else if(colorSlot == 0)
+        this.drawBody(this.tail[i][0],this.tail[i][1],'red');
       else if(colorSlot == 1)
-        fill('yellow');
+        this.drawBody(this.tail[i][0],this.tail[i][1],'yellow');
       else if(colorSlot == 2)
-        fill('red');
+        this.drawBody(this.tail[i][0],this.tail[i][1],'red');
       else
-        fill('black');
-      rect(this.tail[i][0]*gm.xscale,this.tail[i][1]*gm.yscale,gm.xscale,gm.yscale);
+        this.drawBody(this.tail[i][0],this.tail[i][1],'black');
     }
   }
   drawHead(){
@@ -150,6 +159,34 @@ class snake {
       quad(scaledx,scaledy,scaledx+gm.xscale,scaledy,scaledx+2*gm.xscale/3,scaledy+gm.yscale,scaledx+gm.xscale/3,scaledy+gm.yscale);
     else if(this.direction == "UP")
       quad(scaledx,scaledy+gm.yscale,scaledx+gm.xscale,scaledy+gm.yscale,scaledx+2*gm.xscale/3,scaledy, scaledx+gm.xscale/3,scaledy);
+  }
+  drawTail(x,y,color,prevSegment){
+    var tailDirection;
+    if(x > prevSegment[0])
+      tailDirection = "LEFT";
+    else if(x < prevSegment[0])
+      tailDirection = "RIGHT";
+    else if(y < prevSegment[1])
+      tailDirection = "DOWN";
+    else
+      tailDirection = "UP";
+
+    fill(color);
+    var scaledx = x*gm.xscale;
+    var scaledy = y*gm.yscale;
+    if(tailDirection == "LEFT") 
+      triangle(scaledx,scaledy,scaledx,scaledy+gm.yscale,scaledx+gm.xscale,scaledy+gm.yscale/2);
+    else if(tailDirection == "RIGHT")
+      triangle(scaledx+gm.xscale,scaledy,scaledx+gm.xscale,scaledy+gm.yscale,scaledx,scaledy+gm.yscale/2);
+    else if(tailDirection == "UP")
+      triangle(scaledx,scaledy,scaledx+gm.xscale,scaledy,scaledx+gm.xscale/2,scaledy+gm.yscale);
+    else if(tailDirection == "DOWN")
+      triangle(scaledx,scaledy+gm.yscale,scaledx+gm.xscale,scaledy+gm.yscale,scaledx+gm.xscale/2,scaledy);   
+  }
+  drawBody(x,y,color)
+  {
+    fill(color);
+    rect(x*gm.xscale,y*gm.yscale,gm.xscale,gm.yscale);
   }
 }
 
@@ -176,7 +213,12 @@ class foodie {
     }
     this.x = (floor(random()*gm.gridWidth));
     this.y = (floor(random()*gm.gridHeight));
+    gm.background = [random()*255,random()*255,random()*255];
+    this.changeColor();
     playr.length++;
+  }
+  changeColor(){
+    this.color = [random()*255,random()*255,random()*255];
   }
 }
 
@@ -206,6 +248,7 @@ class foodieGiblet {
     fill(this.color);
     rectMode(CENTER);
     rect(this.x,this.y,this.size,this.size);
+    rectMode(CORNER);
   }
 }
 
