@@ -57,15 +57,23 @@ class game {
   get yscale() {
     return this.cnvHeight/this.gridHeight;
   }
-  draw(){
-    textSize(16);
-    fill(0,102,153);
-    text("SCORE: " + (playr.length - 1),0,15);
+  draw(){  
+    this.drawScore();
     if(this.status == "LOST")
     {
-      textSize(gm.gridWidth)
-      text("GAME OVER", gm.cnvWidth/5, gm.cnvHeight/2)
+      this.drawGameOver();
     }
+  }
+
+  //Used in Draw
+  drawScore(){
+    textSize(gm.cnvWidth/50);
+    fill(0,102,153);
+    text("SCORE: " + (playr.length - 1),0,15);
+  }
+  drawGameOver(){
+      textSize(gm.cnvWidth/15)
+      text("GAME OVER", gm.cnvWidth/3.5, gm.cnvHeight/2)
   }
 }
 
