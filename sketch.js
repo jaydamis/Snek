@@ -58,6 +58,7 @@ class game {
     this.cnvHeight = cnvHeight;
     this.status = "GO";
     this.background = [120,120,120];
+    this.backgroundChangeRate = [20,20,20];
   }
   get xscale() {
     return this.cnvWidth/this.gridWidth;
@@ -73,11 +74,15 @@ class game {
     }
   }
   updateBackground(){
-    this.background[0] = this.background[0] + floor(random()*11)-5;
-    this.background[1] = this.background[1] + floor(random()*11)-5;
-    this.background[2] = this.background[2] + floor(random()*11)-5;
+    for(i=0;i<3;i++){
+      this.updateSingleBackgroundValue(i);
+    }
   }
-
+  updateSingleBackgroundValue(i){
+    var bkg = this.background;
+    var bkgChgRt = this.backgroundChangeRate;
+    bkg[i] = bkg[i] + floor(random()*bkgChgRt[i])-bkgChgRt[i]/2;
+  }
   //Used in Draw
   drawScore(){
     textSize(gm.cnvWidth/50);
