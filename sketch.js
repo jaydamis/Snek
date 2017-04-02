@@ -6,7 +6,7 @@ var pauseMenu;
 var settingsMenu;
 
 function setup() {
-  gm = new game(96,48,window.innerWidth,window.innerHeight);
+  gm = new game(48,24,window.innerWidth,window.innerHeight);
   createCanvas(gm.cnvWidth, gm.cnvHeight);
   frameRate(20);
 
@@ -70,6 +70,7 @@ function updateAndDrawGiblets()
     foodieGiblets[i].draw();
     if(foodieGiblets[i].deleteMe)
       foodieGiblets.splice(i,1);
+  }
 }
 function updateAndDrawFoodies(){
   foodies.forEach(function(entry) {
