@@ -6,7 +6,7 @@ var pauseMenu;
 var settingsMenu;
 
 function setup() {
-  gm = new game(48,24,window.innerWidth,window.innerHeight);
+  gm = new game(48*2,24*2,window.innerWidth,window.innerHeight);
   createCanvas(gm.cnvWidth, gm.cnvHeight);
   frameRate(20);
 
@@ -331,7 +331,7 @@ class foodie {
     this.x = (floor(random()*gm.gridWidth));
     this.y = (floor(random()*gm.gridHeight));
     this.color = [random()*255,random()*255,random()*255];
-    this.gibletQtyRange = [300,500];
+    this.gibletQtyRange = [20,30];
     this.iteration = 0;
   }
   draw(){ 
@@ -368,16 +368,14 @@ class foodieGiblet {
     this.color = color;
     this.deleteMe = false;
     this.speed = (gm.cnvWidth / 50)*(random()/2 +.5);
-    this.size = (gm.xscale+gm.yscale)/((2)*(1+random()));
+    this.size = (gm.xscale+gm.yscale)/((4)*(1+random()));
     this.rotateSpeed = (1+random()*8)*Math.PI/6;
     this.angle = random()*2*Math.PI;
-    this.iteration = 0;
   }  
   update() {
     this.x = this.x + Math.cos(this.direction)*this.speed;
     this.y = this.y + Math.sin(this.direction)*this.speed;
     this.angle = this.angle += this.rotateSpeed;
-    this.iteration = this.iteration + this.speed*10;
     this.deleteMe = this.isOffScreen();      
   }
   isOffScreen(){
