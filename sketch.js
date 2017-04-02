@@ -2,12 +2,15 @@
 var gm;
 var playr;
 var foodies;
+var pauseMenu;
 
 //var gameState = {GO : 1, NO : 2};
 
 function setup() {
   gm = new game(96,48,window.innerWidth,window.innerHeight);
   createCanvas(gm.cnvWidth, gm.cnvHeight);
+  frameRate(20);
+
   playr = new snake(1,1);
   foodies = new Array(10);
   for( i=0; i<foodies.length;i++)
@@ -15,7 +18,17 @@ function setup() {
     foodies[i] = new foodie();
   }
   foodieGiblets = [];
-  frameRate(20);
+
+  setupMenus();
+}
+function setupMenus() {
+  setupPauseMenu();
+}
+function setupPauseMenu() {
+  pauseMenu = new menu("PAUSED");
+  pauseMenu.addMenuItem("Resume Snekking",new Function('gm.status = "GO"'));
+  pauseMenu.addMenuItem("Snek Settings",new Function('gm.status = "SETTINGS";'));
+  pauseMenu.addMenuItem("Quit Snekking",new Function('window.close();')); 
 }
 
 function keyPressed()
@@ -36,25 +49,13 @@ function keyPressed()
         playr.direction = "DOWN";
   }
 
-
   if(gm.status == "PAUSED")
   {
-    if(keyIsDown(UP_ARROW)){
-      gm.pauseMenuSelection.push(gm.pauseMenuSelection.shift());
-    }
-    if(keyIsDown(DOWN_ARROW)){
-      gm.pauseMenuSelection.unshift(gm.pauseMenuSelection.pop());
-    }
-    if(keyIsDown(32)){
-      for(i=0;i<gm.pauseMenuSelection.length;i++){
-        if(gm.pauseMenuSelection[i])
-          gm.pauseMenuFunctions[i]();
-      }
-    }
+    pauseMenu.keyPress(keyCode);
   }
   else if(gm.status == "SETTINGS")
   {
-    
+
   }
   else if(keyCode == 32){
     if(gm.status == "GO")
@@ -96,12 +97,6 @@ class game {
     this.status = "GO";
     this.background = [120,120,120];
     this.backgroundChangeRate = [20,20,20];
-    this.pauseMenuSelection = [1,0,0];
-    this.pauseMenuFunctions = [
-      function() { gm.status = "GO";},
-      function() { gm.status = "SETTINGS";},
-      function() { window.close();}
-    ];
   }
   get xscale() {
     return this.cnvWidth/this.gridWidth;
@@ -143,27 +138,86 @@ class game {
       text("GAME OVER", gm.cnvWidth/3.5, gm.cnvHeight/2)
   }
   drawPauseMenu(){
-    fill(20);
-    rect(gm.cnvWidth/4,gm.cnvHeight/5,gm.cnvWidth/2,gm.cnvHeight/2)
-    fill(0,102,153);
-    textAlign(CENTER);
-    textSize(gm.cnvWidth/15);
-    text("PAUSED", gm.cnvWidth/2,gm.cnvHeight/3);
-    this.drawMenuItem("Resume Snekking",1);
-    this.drawMenuItem("Snek Settings",2)
-    this.drawMenuItem("Quit Snekking",3);
-
-  }
-  drawMenuItem(textual,menuPosition){
-    textSize(gm.cnvWidth/30);
-    if(gm.pauseMenuSelection[menuPosition-1])
-      fill(120,120,30);
-    else
-      fill(0,102,153);
-    text(textual, gm.cnvWidth/2, gm.cnvHeight/3 + menuPosition*gm.cnvHeight/12);
+    pauseMenu.draw();
   }
   reset(){
     setup();
+  }
+}
+
+class menu {
+  constructor (title){
+    this.title = title;
+    this.menuItems = new Array();
+    this.selectedItem = 0;
+  }
+  addMenuItem(textual,funct)
+  {
+    this.menuItems[this.menuItems.length] = new menuItem(textual, funct);
+  }
+  menuMove(direction)
+  {
+    if(direction == "DOWN"){
+      this.selectedItem++;
+      if(this.selectedItem > this.menuItems.length - 1) {
+        this.selectedItem = 0;
+      }
+    }
+    else
+      this.selectedItem--;
+      if(this.selectedItem < 0){
+        this.selectedItem = this.menuItems.length - 1;
+      }
+  }
+  draw(){
+    this.drawBackground();
+    this.drawTitle();
+    this.drawMenuItems();
+  }
+  drawBackground(){
+    fill(20);
+    rect(gm.cnvWidth/4,gm.cnvHeight/5,gm.cnvWidth/2,gm.cnvHeight/2)
+  }
+  drawTitle(){
+    fill(0,102,153);
+    textAlign(CENTER);
+    textSize(gm.cnvWidth/15);
+    text(this.title, gm.cnvWidth/2,gm.cnvHeight/3);
+  }
+  drawMenuItems(){
+    for(i=0;i<this.menuItems.length;i++)
+    {
+      this.menuItems[i].draw(i, this.selectedItem);
+    }
+  }
+  select(){
+    this.menuItems[this.selectedItem].funct();
+  }
+  keyPress(key){
+    if(key == UP_ARROW){
+      this.menuMove("UP");
+    }
+    if(key == DOWN_ARROW){
+      this.menuMove("DOWN");
+    }
+    if(key == 32){
+      this.select();
+    }
+  }
+}
+class menuItem {
+  constructor(textual,funct)
+  {
+    this.textual = textual;
+    this.funct = funct;
+  }
+  draw(slot,selectedItem){
+    textSize(gm.cnvWidth/30);
+    if(slot == selectedItem)
+      fill(120,120,30);
+    else
+      fill(0,102,153);
+    text(this.textual, gm.cnvWidth/2, gm.cnvHeight/3 + (slot+1)*gm.cnvHeight/12);
   }
 }
 
