@@ -3,8 +3,7 @@ var gm;
 var playr;
 var foodies;
 var pauseMenu;
-
-//var gameState = {GO : 1, NO : 2};
+var settingsMenu;
 
 function setup() {
   gm = new game(96,48,window.innerWidth,window.innerHeight);
@@ -23,6 +22,7 @@ function setup() {
 }
 function setupMenus() {
   setupPauseMenu();
+  setupSettingsMenu();
 }
 function setupPauseMenu() {
   pauseMenu = new menu("PAUSED");
@@ -30,32 +30,23 @@ function setupPauseMenu() {
   pauseMenu.addMenuItem("Snek Settings",new Function('gm.status = "SETTINGS";'));
   pauseMenu.addMenuItem("Quit Snekking",new Function('window.close();')); 
 }
+function setupSettingsMenu(){
+  settingsMenu = new menu("SETTINGS");
+  settingsMenu.addMenuItem("Back 2 Snek Pause", new Function('gm.status = "PAUSED"'));
+}
 
 function keyPressed()
 {
-
   if(gm.status == "GO"){
-    if(keyIsDown(LEFT_ARROW))
-      if(playr.direction != "RIGHT")
-        playr.direction = "LEFT";
-    if(keyIsDown(RIGHT_ARROW))
-      if(playr.direction != "LEFT")
-        playr.direction = "RIGHT";
-    if(keyIsDown(UP_ARROW))
-      if(playr.direction != "DOWN")
-        playr.direction = "UP";
-    if(keyIsDown(DOWN_ARROW))
-      if(playr.direction != "UP")
-        playr.direction = "DOWN";
+    playr.keyPress(keyCode);
   }
-
   if(gm.status == "PAUSED")
   {
     pauseMenu.keyPress(keyCode);
   }
   else if(gm.status == "SETTINGS")
   {
-
+    settingsMenu.keyPress(keyCode);
   }
   else if(keyCode == 32){
     if(gm.status == "GO")
@@ -110,9 +101,11 @@ class game {
     {
       this.drawGameOver();
     }
-    if(this.status == "PAUSED")
-    {
-      this.drawPauseMenu();
+    if(this.status == "PAUSED"){
+      pauseMenu.draw();
+    }
+    if(this.status == "SETTINGS"){
+      settingsMenu.draw();
     }
   }
   updateBackground(){
@@ -136,9 +129,6 @@ class game {
       textAlign(LEFT);
       textSize(gm.cnvWidth/15)
       text("GAME OVER", gm.cnvWidth/3.5, gm.cnvHeight/2)
-  }
-  drawPauseMenu(){
-    pauseMenu.draw();
   }
   reset(){
     setup();
@@ -316,6 +306,20 @@ class snake {
   {
     fill(color);
     rect(x*gm.xscale,y*gm.yscale,gm.xscale,gm.yscale);
+  }
+  keyPress(key){
+    if(key == LEFT_ARROW)
+      if(playr.direction != "RIGHT")
+        playr.direction = "LEFT";
+    if(key == RIGHT_ARROW)
+      if(playr.direction != "LEFT")
+        playr.direction = "RIGHT";
+    if(key == UP_ARROW)
+      if(playr.direction != "DOWN")
+        playr.direction = "UP";
+    if(key == DOWN_ARROW)
+      if(playr.direction != "UP")
+        playr.direction = "DOWN";
   }
 }
 
