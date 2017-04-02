@@ -40,7 +40,7 @@ function keyPressed()
   if(gm.status == "GO"){
     playr.keyPress(keyCode);
   }
-  if(gm.status == "PAUSED")
+  else if(gm.status == "PAUSED")
   {
     pauseMenu.keyPress(keyCode);
   }
@@ -48,35 +48,34 @@ function keyPressed()
   {
     settingsMenu.keyPress(keyCode);
   }
-  else if(keyCode == 32){
-    if(gm.status == "GO")
-      gm.status = "PAUSED";
-    else if(gm.status == "PAUSED")
-      gm.status = "GO";
-    else if(gm.status == "LOST")
-      gm.reset();
-  }
+  else if(gm.status == "LOST")
+    gm.reset();
 }
 
 function draw() {
   if(gm.status == "GO")
   {
     gm.updateBackground();
-    background(gm.background);
     playr.update();
-    foodies.forEach(function(entry) {
-      entry.update();
-      entry.draw();
-    }, this);
+    updateAndDrawFoodies();
     playr.draw();
-    foodieGiblets.forEach(function(item, index, object){
-      item.update();
-      item.draw();
-      if(item.deleteMe)
-        foodieGiblets.splice(index,1);
-    }, this);
+    updateAndDrawGiblets();
   }
   gm.draw();
+}
+function updateAndDrawGiblets()
+{
+  for(i=0;i<foodieGiblets.length;i++){
+    foodieGiblets[i].update();
+    foodieGiblets[i].draw();
+    if(foodieGiblets[i].deleteMe)
+      foodieGiblets.splice(i,1);
+}
+function updateAndDrawFoodies(){
+  foodies.forEach(function(entry) {
+    entry.update();
+    entry.draw();
+  }, this);
 }
 
 class game {
@@ -112,6 +111,7 @@ class game {
     for(i=0;i<3;i++){
       this.updateSingleBackgroundValue(i);
     }
+    background(gm.background);
   }
   updateSingleBackgroundValue(i){
     var bkg = this.background;
@@ -320,6 +320,8 @@ class snake {
     if(key == DOWN_ARROW)
       if(playr.direction != "UP")
         playr.direction = "DOWN";
+    if(key == 32)
+      gm.status = "PAUSED";
   }
 }
 
@@ -328,7 +330,7 @@ class foodie {
     this.x = (floor(random()*gm.gridWidth));
     this.y = (floor(random()*gm.gridHeight));
     this.color = [random()*255,random()*255,random()*255];
-    this.gibletQtyRange = [10,15];
+    this.gibletQtyRange = [300,500];
     this.iteration = 0;
   }
   draw(){ 
@@ -391,15 +393,8 @@ class foodieGiblet {
     translate(this.x,this.y);
     rotate(this.angle);
     rect(0,0,this.size,this.size);
-    //this.drawSillyCircle();
     pop();
     rectMode(CORNER);
-  }
-  drawSillyCircle(){
-    noFill();
-    stroke(this.color);
-    strokeWeight(2);
-    ellipse(0,0,this.iteration,this.iteration);
   }
 }
 
