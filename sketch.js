@@ -4,9 +4,11 @@ var playr;
 var foodies;
 var pauseMenu;
 var settingsMenu;
+var soundEat;
+var soundDie;
 
 function setup() {
-  gm = new game(48*2,24*2,window.innerWidth,window.innerHeight);
+  gm = new game(48,24,window.innerWidth,window.innerHeight);
   createCanvas(gm.cnvWidth, gm.cnvHeight);
   frameRate(20);
 
@@ -19,6 +21,10 @@ function setup() {
   foodieGiblets = [];
 
   setupMenus();
+
+  soundFormats("mp3","wav");
+  soundEat = loadSound("sounds/09 - EnemyDamage.wav")
+  soundDie = loadSound("sounds/08 - MegamanDefeat.wav")
 }
 function setupMenus() {
   setupPauseMenu();
@@ -50,6 +56,12 @@ function keyPressed()
   }
   else if(gm.status == "LOST")
     gm.reset();
+}
+
+function windowResized() {
+  gm.cnvWidth = window.innerWidth;
+  gm.cnvHeight = window.innerHeight;
+  resizeCanvas(gm.cnvWidth,gm.cnvHeight);
 }
 
 function draw() {
@@ -196,6 +208,7 @@ class menu {
     }
   }
 }
+
 class menuItem {
   constructor(textual,funct)
   {
@@ -243,12 +256,17 @@ class snake {
     }
     this.tail[0] = new Array(this.x,this.y);
     if(this.x < 0 || this.y < 0 || this.x > gm.gridWidth-1 || this.y > gm.gridHeight-1)
+    {
       gm.status = "LOST";
+      soundDie.play();
+    }
     for(i=1;i<this.tail.length;i++)
     {
       if(this.tail[0][0]==this.tail[i][0] && this.tail[0][1] == this.tail[i][1])
         gm.status = "LOST";
     }
+    if(gm.status == "LOST")
+        soundDie.play();
   }
   draw(){
     this.drawHead('black');
@@ -354,6 +372,7 @@ class foodie {
     gm.background = [random()*255,random()*255,random()*255];
     this.changeColor();
     playr.length++;
+    soundEat.play();
   }
   changeColor(){
     this.color = [random()*255,random()*255,random()*255];
