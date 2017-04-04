@@ -6,8 +6,18 @@ var pauseMenu;
 var settingsMenu;
 var soundEat;
 var soundDie;
+var musac;
+
+function preload() {
+  soundFormats("mp3","wav");
+  soundEat = loadSound("sounds/09 - EnemyDamage.wav");
+  soundDie = loadSound("sounds/08 - MegamanDefeat.wav");
+  //musac = loadSound("sounds/TOBACCO - Father Sister Berzerker.mp3");
+  
+}
 
 function setup() {
+  
   gm = new game(48,24,window.innerWidth,window.innerHeight);
   createCanvas(gm.cnvWidth, gm.cnvHeight);
   frameRate(20);
@@ -21,10 +31,9 @@ function setup() {
   foodieGiblets = [];
 
   setupMenus();
-
-  soundFormats("mp3","wav");
-  soundEat = loadSound("sounds/09 - EnemyDamage.wav")
-  soundDie = loadSound("sounds/08 - MegamanDefeat.wav")
+  // musac.stop();
+  // musac.play();
+  // musac.setVolume(.1);
 }
 function setupMenus() {
   setupPauseMenu();
