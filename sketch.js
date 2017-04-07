@@ -5,14 +5,15 @@ var foodies;
 var pauseMenu;
 var settingsMenu;
 var controlsMenu;
+var gameplayMenu;
 var audio;
 
 function preload() {
   audio = new sounds();
+  gm = new game(48,24,window.innerWidth,window.innerHeight, new settings());
 }
 
 function setup() {
-  gm = new game(48,24,window.innerWidth,window.innerHeight, new settings());
   createCanvas(gm.cnvWidth, gm.cnvHeight);
   frameRate(20);
 
@@ -35,6 +36,7 @@ function setupMenus() {
   setupPauseMenu();
   setupSettingsMenu();
   setupControlsMenu();
+  setupGameplayMenu();
 }
 
 function setupPauseMenu() {
@@ -46,6 +48,7 @@ function setupPauseMenu() {
 function setupSettingsMenu(){
   settingsMenu = new menu("SETTINGS");
   settingsMenu.addMenuItem("Back 2 Snek Pause", new Function('gm.status = "PAUSED"'), []);
+  settingsMenu.addMenuItem("Snek Gameplay", new Function('gm.status = "SETTINGS_Gameplay"'), []);
   settingsMenu.addMenuItem("Snekky Controls", new Function('gm.status = "SETTINGS_Control";'), []);
 }
 function setupControlsMenu(){
@@ -53,6 +56,12 @@ function setupControlsMenu(){
   controlsMenu.addMenuItem("Bak 2 Snek Settingz", new Function('gm.status = "SETTINGS";'), []);
   controlsMenu.addMenuItem("Keyboard Mode", new Function('this.selectPress("keyboardMode");'), gm.settings.keyboardModes);
   controlsMenu.addMenuItem("Tap Mode", new Function('this.selectPress("tapMode");'), gm.settings.tapModes);
+}
+function setupGameplayMenu(){
+  gameplayMenu = new menu("GAMEPLAY");
+  gameplayMenu.addMenuItem("Back to Settings", new Function('gm.status = "SETTINGS";'), []);
+  gameplayMenu.addMenuItem("Grid Size", new Function('this.selectPress("gridSize");'), gm.settings.gridSizes);
+  gameplayMenu.addMenuItem("Giblet Quantity", new Function('this.selectPress("gibletQty");'), gm.settings.gibletQtys);
 }
 
 function keyPressed()
@@ -68,6 +77,9 @@ function keyPressed()
   }
   else if(gm.status == "SETTINGS_Control") {
     controlsMenu.keyPress(keyCode);
+  }
+  else if(gm.status == "SETTINGS_Gameplay"){
+    gameplayMenu.keyPress(keyCode);
   }
   else if(gm.status == "LOST")
     gm.reset();
@@ -122,10 +134,23 @@ class sounds {
 
 class settings {
   constructor() {
+    this.gibletQty = "Normal";
+    this.gibletQtys = ["Normal", "Retarded"];
+    this.gibletQtyLookup = {"Normal":[20,30], "Retarded":[100,300]};
+    this.gridSize = "Medium";
+    this.gridSizes = ["Small", "Medium", "Large"];
+    this.gridSizeLookup = {"Small":[36,18], "Medium":[48,24], "Large":[72,36]};
     this.keyboardMode = "Arrow";
     this.keyboardModes = ["Arrow", "Vim"];
+    this.keyboardModeVIMLookup = {72:LEFT_ARROW, 74:UP_ARROW, 75:DOWN_ARROW, 76:RIGHT_ARROW};
     this.tapMode = "Relative";
     this.tapModes = ["Absolute", "Relative"];
+  }
+  getGridSize(){
+    return this.gridSizeLookup[this.gridSize];
+  }
+  getGibletQty(){
+    return this.gibletQtyLookup[this.gibletQty];
   }
 }
 
@@ -161,6 +186,9 @@ class game {
     if(this.status == "SETTINGS_Control"){
       controlsMenu.draw();
     }
+    if(this.status == "SETTINGS_Gameplay"){
+      gameplayMenu.draw();
+    }
   }
   updateBackground(){
     for(var i=0;i<3;i++){
@@ -186,6 +214,9 @@ class game {
       text("GAME OVER", gm.cnvWidth/3.5, gm.cnvHeight/2)
   }
   reset(){
+    gm.status = "GO";
+    this.gridWidth = this.settings.getGridSize()[0];
+    this.gridHeight = this.settings.getGridSize()[1];
     setup();
   }
   mousePress(x, y){
@@ -328,7 +359,7 @@ class snake {
   constructor (x, y){
    this.x = x;
    this.y = y;
-   this.direction = "DOWN";
+   this.direction = "RIGHT";
    this.speed = 1;
    this.length = 1;
    this.tail = new Array (new Array(x,y));
@@ -426,6 +457,8 @@ class snake {
     rect(x*gm.xscale,y*gm.yscale,gm.xscale,gm.yscale);
   }
   keyPress(key){
+    if(gm.settings.keyboardMode == "Vim")
+      key = this.translateVimKeys(key);
     if(key == LEFT_ARROW)
       if(playr.direction != "RIGHT")
         playr.direction = "LEFT";
@@ -440,6 +473,9 @@ class snake {
         playr.direction = "DOWN";
     if(key == 32)
       gm.status = "PAUSED";
+  }
+  translateVimKeys(key){
+    return gm.settings.keyboardModeVIMLookup[key];
   }
   mousePress(quadrant){
     if(playr.direction == "RIGHT")
@@ -456,7 +492,7 @@ class foodie {
     this.x = (floor(random()*gm.gridWidth));
     this.y = (floor(random()*gm.gridHeight));
     this.color = [random()*255,random()*255,random()*255];
-    this.gibletQtyRange = [20,30];
+    this.gibletQtyRange = gm.settings.getGibletQty();
     this.iteration = 0;
   }
   draw(){ 
