@@ -382,6 +382,8 @@ class snake {
    this.tail = new Array (new Array(x,y));
    this.bodyColors = ['yellow','red','red','yellow','black','black'];
    this.tailQueue = 0;
+   this.powerup = "None";
+   this.powerupTimeRemaining = 0;
   }
   update(){
     switch(this.direction){
@@ -420,9 +422,21 @@ class snake {
     }
     if(gm.status == "LOST")
         audio.die.play();
+
+    if(this.powerup != "None"){
+      this.powerupTimeRemaining--;
+      if(this.powerupTimeRemaining <= 0)
+        this.powerup = "None";
+    }
   }
   draw(){
-    this.drawHead('black');
+    this.drawHead('black',this.x,this.y);
+    if(this.powerup == "Hydra"){
+      if(this.direction == "RIGHT"){
+        this.drawHead('black',this.x,this.y+1);
+        this.drawHead('black',this.x,this.y-1);
+      }
+    }
     for(var i=1;i<this.tail.length;i++)
     {
       var colorSlot = (i+this.bodyColors.length-1)%this.bodyColors.length;
@@ -433,10 +447,10 @@ class snake {
         this.drawBody(this.tail[i][0],this.tail[i][1],this.bodyColors[colorSlot]);
     }
   }
-  drawHead(color){
+  drawHead(color,x,y){
     fill(color);
-    var scaledx = this.x*gm.xscale;
-    var scaledy = this.y*gm.yscale;
+    var scaledx = x*gm.xscale;
+    var scaledy = y*gm.yscale;
     if(this.direction == "RIGHT") {
       quad(scaledx,scaledy,scaledx,scaledy+gm.yscale,scaledx+gm.xscale,
         scaledy+2*gm.yscale/3,scaledx+gm.xscale,scaledy+gm.yscale/3); }
@@ -520,7 +534,10 @@ class foodie {
   }
   draw(){ 
     fill(this.color);
-    rect(this.x*gm.xscale,this.y*gm.yscale,gm.xscale,gm.yscale);
+    if(this.powerup == "Hydra")
+      ellipse((this.x+.5)*gm.xscale,(this.y+.5)*gm.yscale,gm.xscale,gm.yscale);
+    else
+      rect(this.x*gm.xscale,this.y*gm.yscale,gm.xscale,gm.yscale);
   }
   update(){
     if(this.x == playr.x && this.y == playr.y){
@@ -544,6 +561,10 @@ class foodie {
           foodies[i].getEaten();
       }
     }
+    else if(this.powerup == "Hydra"){
+      playr.powerup = this.powerup;
+      playr.powerupTimeRemaining += 30;
+    }
     this.changeColor();
     this.powerup = this.getPowerup();
     playr.tailQueue++;
@@ -556,6 +577,8 @@ class foodie {
     var rnd = floor(random()*100);
     if(rnd < 5)
       return "SuperNom";
+    else if(rnd<100)
+      return "Hydra";
     else
       return "Normal";
   }
