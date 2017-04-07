@@ -51,7 +51,8 @@ function setupSettingsMenu(){
 function setupControlsMenu(){
   controlsMenu = new menu("CONTROLS");
   controlsMenu.addMenuItem("Bak 2 Snek Settingz", new Function('gm.status = "SETTINGS";'), []);
-  controlsMenu.addMenuItem("Keyboard Mode", new Function('this.selectPress("keyboardMode");'), ["ARROW","VIM"]);
+  controlsMenu.addMenuItem("Keyboard Mode", new Function('this.selectPress("keyboardMode");'), gm.settings.keyboardModes);
+  controlsMenu.addMenuItem("Tap Mode", new Function('this.selectPress("tapMode");'), gm.settings.tapModes);
 }
 
 function keyPressed()
@@ -121,8 +122,10 @@ class sounds {
 
 class settings {
   constructor() {
-    this.keyboardMode = "ARROW";
-    this.keyboardModes = ["ARROW", "VIM"];
+    this.keyboardMode = "Arrow";
+    this.keyboardModes = ["Arrow", "Vim"];
+    this.tapMode = "Relative";
+    this.tapModes = ["Absolute", "Relative"];
   }
 }
 
