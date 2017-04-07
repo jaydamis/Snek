@@ -40,7 +40,7 @@ function setupMenus() {
 }
 
 function setupPauseMenu() {
-  pauseMenu = new menu("PAUSED");
+  pauseMenu = new menu("PAUsSED");
   pauseMenu.addMenuItem("Resume Snekking", new Function('gm.status = "GO"'), []);
   pauseMenu.addMenuItem("Snek Settings", new Function('gm.status = "SETTINGS";'), []);
   pauseMenu.addMenuItem("Quit Snekking", new Function('window.close();'), []); 
