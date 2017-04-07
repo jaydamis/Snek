@@ -223,6 +223,7 @@ class game {
     gm.status = "GO";
     this.gridWidth = this.settings.getGridSize()[0];
     this.gridHeight = this.settings.getGridSize()[1];
+    this.background = [120,120,120];
     setup();
   }
   mousePress(x, y){
@@ -430,13 +431,7 @@ class snake {
     }
   }
   draw(){
-    this.drawHead('black',this.x,this.y);
-    if(this.powerup == "Hydra"){
-      var heads = this.getHeadLocations();
-      for(var i=0;i<5;i++){
-        this.drawHead('black',heads[i][0],heads[i][1]);
-      }
-    }
+    this.drawHeads();
     for(var i=1;i<this.tail.length;i++)
     {
       var colorSlot = (i+this.bodyColors.length-1)%this.bodyColors.length;
@@ -445,6 +440,16 @@ class snake {
       }
       else
         this.drawBody(this.tail[i][0],this.tail[i][1],this.bodyColors[colorSlot]);
+    }
+  }
+  drawHeads(){
+    var headColor = this.getRandomColor();
+    this.drawHead(headColor,this.x,this.y);
+    if(this.powerup == "Hydra"){
+      var heads = this.getHeadLocations();
+      for(var i=0;i<5;i++){
+        this.drawHead(headColor,heads[i][0],heads[i][1]);
+      }
     }
   }
   drawHead(color,x,y){
@@ -489,9 +494,9 @@ class snake {
       return "UP";
   }
   getHeadLocations(){
-    var heads = []
+    var heads = [];
     if(this.powerup != "Hydra")
-      return [this.x,this.y];
+      return [[this.x,this.y]];
     else{
       if(this.direction == "LEFT" || this.direction == "RIGHT"){
         for(var i=-2;i<3;i++){
@@ -505,6 +510,9 @@ class snake {
       }
     }
     return heads;
+  }
+  getRandomColor(){
+    return [random()*255,random()*255,random()*255];
   }
   drawBody(x,y,color)
   {
@@ -558,8 +566,11 @@ class foodie {
       rect(this.x*gm.xscale,this.y*gm.yscale,gm.xscale,gm.yscale);
   }
   update(){
-    if(this.x == playr.x && this.y == playr.y){
-      this.getEaten();
+    var heads = playr.getHeadLocations();
+    for(var i=0;i<heads.length;i++){
+      if(this.x == heads[i][0] && this.y == heads[i][1]){
+        this.getEaten();
+      }
     }
     if(this.powerup == "SuperNom")
       this.changeColor()
@@ -595,7 +606,7 @@ class foodie {
     var rnd = floor(random()*100);
     if(rnd < 5)
       return "SuperNom";
-    else if(rnd<100)
+    else if(rnd<15)
       return "Hydra";
     else
       return "Normal";
