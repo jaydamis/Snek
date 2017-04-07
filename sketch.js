@@ -432,9 +432,9 @@ class snake {
   draw(){
     this.drawHead('black',this.x,this.y);
     if(this.powerup == "Hydra"){
-      if(this.direction == "RIGHT"){
-        this.drawHead('black',this.x,this.y+1);
-        this.drawHead('black',this.x,this.y-1);
+      var heads = this.getHeadLocations();
+      for(var i=0;i<5;i++){
+        this.drawHead('black',heads[i][0],heads[i][1]);
       }
     }
     for(var i=1;i<this.tail.length;i++)
@@ -487,6 +487,24 @@ class snake {
       return "DOWN";
     else
       return "UP";
+  }
+  getHeadLocations(){
+    var heads = []
+    if(this.powerup != "Hydra")
+      return [this.x,this.y];
+    else{
+      if(this.direction == "LEFT" || this.direction == "RIGHT"){
+        for(var i=-2;i<3;i++){
+          heads[i+2] =[this.x,this.y+i];
+        }
+      }
+      else{
+        for(var i=-2;i<3;i++){
+          heads[i+2] = [this.x+i,this.y];
+        }
+      }
+    }
+    return heads;
   }
   drawBody(x,y,color)
   {
