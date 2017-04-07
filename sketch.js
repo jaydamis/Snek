@@ -4,20 +4,15 @@ var playr;
 var foodies;
 var pauseMenu;
 var settingsMenu;
-var soundEat;
-var soundDie;
+var audio;
 var musac;
 
 function preload() {
-  soundFormats("mp3","wav");
-  soundEat = loadSound("sounds/09 - EnemyDamage.wav");
-  soundDie = loadSound("sounds/08 - MegamanDefeat.wav");
-  //musac = loadSound("sounds/TOBACCO - Father Sister Berzerker.mp3");
-  
+  audio = new sounds();
 }
 
 function setup() {
-  
+
   gm = new game(48,24,window.innerWidth,window.innerHeight);
   createCanvas(gm.cnvWidth, gm.cnvHeight);
   frameRate(20);
@@ -35,10 +30,12 @@ function setup() {
   // musac.play();
   // musac.setVolume(.1);
 }
+
 function setupMenus() {
   setupPauseMenu();
   setupSettingsMenu();
 }
+
 function setupPauseMenu() {
   pauseMenu = new menu("PAUSED");
   pauseMenu.addMenuItem("Resume Snekking",new Function('gm.status = "GO"'));
@@ -98,6 +95,14 @@ function updateAndDrawFoodies(){
     entry.update();
     entry.draw();
   }, this);
+}
+
+class sounds {
+  constructor(){
+    soundFormats("mp3","wav");
+    this.die = loadSound("sounds/08 - MegamanDefeat.wav");
+    this.eat = loadSound("sounds/09 - EnemyDamage.wav");
+  }
 }
 
 class game {
@@ -267,7 +272,7 @@ class snake {
     if(this.x < 0 || this.y < 0 || this.x > gm.gridWidth-1 || this.y > gm.gridHeight-1)
     {
       gm.status = "LOST";
-      soundDie.play();
+      audio.die.play();
     }
     for(i=1;i<this.tail.length;i++)
     {
@@ -275,7 +280,7 @@ class snake {
         gm.status = "LOST";
     }
     if(gm.status == "LOST")
-        soundDie.play();
+        audio.die.play();
   }
   draw(){
     this.drawHead('black');
@@ -381,7 +386,7 @@ class foodie {
     gm.background = [random()*255,random()*255,random()*255];
     this.changeColor();
     playr.length++;
-    soundEat.play();
+    audio.eat.play();
   }
   changeColor(){
     this.color = [random()*255,random()*255,random()*255];
