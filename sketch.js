@@ -39,19 +39,19 @@ function setupMenus() {
 
 function setupPauseMenu() {
   pauseMenu = new menu("PAUSED");
-  pauseMenu.addMenuItem("Resume Snekking",new Function('gm.status = "GO"'),[]);
-  pauseMenu.addMenuItem("Snek Settings",new Function('gm.status = "SETTINGS";'),[]);
-  pauseMenu.addMenuItem("Quit Snekking",new Function('window.close();'),[]); 
+  pauseMenu.addMenuItem("Resume Snekking", new Function('gm.status = "GO"'), []);
+  pauseMenu.addMenuItem("Snek Settings", new Function('gm.status = "SETTINGS";'), []);
+  pauseMenu.addMenuItem("Quit Snekking", new Function('window.close();'), []); 
 }
 function setupSettingsMenu(){
   settingsMenu = new menu("SETTINGS");
-  settingsMenu.addMenuItem("Back 2 Snek Pause", new Function('gm.status = "PAUSED"'),[]);
-  settingsMenu.addMenuItem("Snekky Controls", new Function('gm.status = "SETTINGS_Control";'),[]);
+  settingsMenu.addMenuItem("Back 2 Snek Pause", new Function('gm.status = "PAUSED"'), []);
+  settingsMenu.addMenuItem("Snekky Controls", new Function('gm.status = "SETTINGS_Control";'), []);
 }
 function setupControlsMenu(){
   controlsMenu = new menu("CONTROLS");
-  controlsMenu.addMenuItem("Bak 2 Snek Settingz", new Function('gm.status = "SETTINGS";'),[]);
-  controlsMenu.addMenuItem("Keyboard Mode", new Function('gm.status = "SETTINGS";'), ["ARROW","VIM"]);
+  controlsMenu.addMenuItem("Bak 2 Snek Settingz", new Function('gm.status = "SETTINGS";'), []);
+  controlsMenu.addMenuItem("Keyboard Mode", new Function('this.selectPress("keyboardMode");'), ["ARROW","VIM"]);
 }
 
 function keyPressed()
@@ -211,9 +211,9 @@ class menu {
     this.menuItems = new Array();
     this.selectedItem = 0;
   }
-  addMenuItem(textual,funct)
+  addMenuItem(textual,funct, selection)
   {
-    this.menuItems[this.menuItems.length] = new menuItem(textual, funct);
+    this.menuItems[this.menuItems.length] = new menuItem(textual, funct, selection);
   }
   menuMove(direction)
   {
@@ -247,9 +247,7 @@ class menu {
   drawMenuItems(){
     for(var i=0;i<this.menuItems.length;i++)
     {
-      console.log(i);
       this.menuItems[i].draw(i, this.selectedItem);
-      console.log("Drew " + this.menuItems[i].textual);
     }
   }
   select(){
@@ -269,14 +267,12 @@ class menu {
 }
 
 class menuItem {
-  constructor(textual,funct,selects)
+  constructor(textual, funct, selects)
   {
     this.textual = textual;
     this.funct = funct;
     //this.selections = [];
     var selected = 0;
-    if(textual == "Keyboard Mode")
-      selects = ["ARROW","VIM"];
     if(typeof selects != 'undefined'){
       this.selections = selects;
     }
@@ -297,7 +293,7 @@ class menuItem {
     else
       fill(0,102,153);
     textSize(gm.cnvWidth/30);
-    text(this.textual, gm.cnvWidth/2, gm.cnvHeight/3 + (slot+1)*gm.cnvHeight/12);
+    text(this.textual, gm.cnvWidth/2, gm.cnvHeight/3 + (slot+1.5)*gm.cnvHeight/12);
 
   }
   drawSelections(slot){
@@ -310,8 +306,18 @@ class menuItem {
         color = [0,102,153];
       fill(color);
       textSize(gm.cnvWidth/40);
-      text(this.selections[i], gm.cnvWidth/2+(i+.5)*gm.cnvWidth/8,gm.cnvHeight/3 + (slot+1)*gm.cnvHeight/12);
+      text(this.selections[i], gm.cnvWidth/2+(i+.5)*gm.cnvWidth/8,gm.cnvHeight/3 + (slot+1.5)*gm.cnvHeight/12);
     }
+  }
+  selectPress(option){
+    this.selection++;
+    if(this.selection > this.selections.length - 1)
+      this.selection = 0;
+    for(var propName in gm.settings) {
+      if(propName == option) {
+         gm.settings[propName] = this.selections[this.selection];
+      }
+   }
   }
 }
 
