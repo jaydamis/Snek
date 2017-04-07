@@ -24,7 +24,7 @@ function setup() {
 }
 
 function setupFoodies() {
-  foodies = new Array(10);
+  foodies = new Array(gm.settings.getFoodieQty());
   for(var i=0; i<foodies.length;i++)
   {
     foodies[i] = new foodie();
@@ -41,7 +41,7 @@ function setupMenus() {
 
 function setupPauseMenu() {
   pauseMenu = new menu("PAUSED");
-  pauseMenu.addMenuItem("Resume Snekking", new Function('gm.status = "GO"'), []);
+  pauseMenu.addMenuItem("Snek Time", new Function('gm.status = "GO"'), []);
   pauseMenu.addMenuItem("Snek Settings", new Function('gm.status = "SETTINGS";'), []);
   pauseMenu.addMenuItem("Quit Snekking", new Function('window.close();'), []); 
 }
@@ -61,11 +61,11 @@ function setupGameplayMenu(){
   gameplayMenu = new menu("GAMEPLAY");
   gameplayMenu.addMenuItem("Back to Settings", new Function('gm.status = "SETTINGS";'), []);
   gameplayMenu.addMenuItem("Grid Size", new Function('this.selectPress("gridSize");'), gm.settings.gridSizes);
+  gameplayMenu.addMenuItem("Foodie Qty", new Function('this.selectPress("foodieQty");'), gm.settings.foodieQtys);
   gameplayMenu.addMenuItem("Giblet Quantity", new Function('this.selectPress("gibletQty");'), gm.settings.gibletQtys);
 }
 
-function keyPressed()
-{
+function keyPressed() {
   if(gm.status == "GO"){
     playr.keyPress(keyCode);
   }
@@ -134,6 +134,9 @@ class sounds {
 
 class settings {
   constructor() {
+    this.foodieQty = "Medium";
+    this.foodieQtys = ["Low", "Medium", "High"];
+    this.foodieQtyLookup = {"Low":5, "Medium":10, "High":20};
     this.gibletQty = "Normal";
     this.gibletQtys = ["Normal", "Retarded"];
     this.gibletQtyLookup = {"Normal":[20,30], "Retarded":[100,300]};
@@ -151,6 +154,9 @@ class settings {
   }
   getGibletQty(){
     return this.gibletQtyLookup[this.gibletQty];
+  }
+  getFoodieQty(){
+    return this.foodieQtyLookup[this.foodieQty];
   }
 }
 
@@ -317,7 +323,6 @@ class menuItem {
   {
     this.textual = textual;
     this.funct = funct;
-    //this.selections = [];
     var selected = 0;
     if(typeof selects != 'undefined'){
       this.selections = selects;
@@ -376,6 +381,7 @@ class snake {
    this.length = 1;
    this.tail = new Array (new Array(x,y));
    this.bodyColors = ['yellow','red','red','yellow','black','black'];
+   this.tailQueue = 0;
   }
   update(){
     switch(this.direction){
@@ -392,10 +398,15 @@ class snake {
         this.x=this.x+this.speed;
         break;
     }
+    if(this.tailQueue > 0){
+      this.length++;
+      this.tailQueue--;
+    }
     for(var i=this.length-1;i>0;i--)
     {
         this.tail[i] = this.tail[i-1];
     }
+    
     this.tail[0] = new Array(this.x,this.y);
     if(this.x < 0 || this.y < 0 || this.x > gm.gridWidth-1 || this.y > gm.gridHeight-1)
     {
@@ -505,7 +516,7 @@ class foodie {
     this.y = (floor(random()*gm.gridHeight));
     this.color = [random()*255,random()*255,random()*255];
     this.gibletQtyRange = gm.settings.getGibletQty();
-    this.iteration = 0;
+    this.powerup = this.getPowerup();
   }
   draw(){ 
     fill(this.color);
@@ -515,6 +526,8 @@ class foodie {
     if(this.x == playr.x && this.y == playr.y){
       this.getEaten();
     }
+    if(this.powerup == "SuperNom")
+      this.changeColor()
   }
   getEaten(){
     var numberOfGiblets = floor(random()*(this.gibletQtyRange[1]-this.gibletQtyRange[0]) +this.gibletQtyRange[0]);//10-15;
@@ -525,12 +538,26 @@ class foodie {
     this.x = (floor(random()*gm.gridWidth));
     this.y = (floor(random()*gm.gridHeight));
     gm.background = [random()*255,random()*255,random()*255];
+    if(this.powerup == "SuperNom"){
+      for(var i=0;i<foodies.length;i++){
+        if(foodies[i].powerup == "Normal")
+          foodies[i].getEaten();
+      }
+    }
     this.changeColor();
-    playr.length++;
+    this.powerup = this.getPowerup();
+    playr.tailQueue++;
     audio.eat.play();
   }
   changeColor(){
     this.color = [random()*255,random()*255,random()*255];
+  }
+  getPowerup(){
+    var rnd = floor(random()*100);
+    if(rnd < 5)
+      return "SuperNom";
+    else
+      return "Normal";
   }
 }
 
