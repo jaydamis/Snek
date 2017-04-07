@@ -381,7 +381,8 @@ class snake {
    this.speed = 1;
    this.length = 1;
    this.tail = new Array (new Array(x,y));
-   this.bodyColors = ['yellow','red','red','yellow','black','black'];
+   this.bodyColorsBase = ['yellow','red','red','yellow','black','black'];
+   this.bodyColors = this.bodyColorsBase;
    this.tailQueue = 0;
    this.powerup = "None";
    this.powerupTimeRemaining = 0;
@@ -429,6 +430,14 @@ class snake {
       if(this.powerupTimeRemaining <= 0)
         this.powerup = "None";
     }
+
+    if(this.powerup == "Trippin"){
+      for(var i=0;i<20;i++){
+        this.bodyColors[i] = this.getRandomColor();
+      }
+    }
+    else
+      this.bodyColors = this.bodyColorsBase;
   }
   draw(){
     this.drawHeads();
@@ -445,12 +454,14 @@ class snake {
   drawHeads(){
     var headColor = this.getRandomColor();
     this.drawHead(headColor,this.x,this.y);
-    if(this.powerup == "Hydra"){
+    if(this.powerup == "Hydra")
+      this.drawHydraHeads(headColor);
+  }
+  drawHydraHeads(headColor){
       var heads = this.getHeadLocations();
       for(var i=0;i<5;i++){
         this.drawHead(headColor,heads[i][0],heads[i][1]);
       }
-    }
   }
   drawHead(color,x,y){
     fill(color);
@@ -590,7 +601,7 @@ class foodie {
           foodies[i].getEaten();
       }
     }
-    else if(this.powerup == "Hydra"){
+    else if(this.powerup != "Normal"){
       playr.powerup = this.powerup;
       playr.powerupTimeRemaining += 30;
     }
@@ -608,6 +619,8 @@ class foodie {
       return "SuperNom";
     else if(rnd<15)
       return "Hydra";
+    else if(rnd<100)
+      return "Trippin"
     else
       return "Normal";
   }
