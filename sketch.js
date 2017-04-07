@@ -4,6 +4,7 @@ var playr;
 var foodies;
 var pauseMenu;
 var settingsMenu;
+var controlsMenu;
 var audio;
 
 function preload() {
@@ -11,7 +12,7 @@ function preload() {
 }
 
 function setup() {
-  gm = new game(48,24,window.innerWidth,window.innerHeight);
+  gm = new game(48,24,window.innerWidth,window.innerHeight, new settings());
   createCanvas(gm.cnvWidth, gm.cnvHeight);
   frameRate(20);
 
@@ -23,7 +24,7 @@ function setup() {
 
 function setupFoodies() {
   foodies = new Array(10);
-  for( i=0; i<foodies.length;i++)
+  for(var i=0; i<foodies.length;i++)
   {
     foodies[i] = new foodie();
   }
@@ -33,17 +34,24 @@ function setupFoodies() {
 function setupMenus() {
   setupPauseMenu();
   setupSettingsMenu();
+  setupControlsMenu();
 }
 
 function setupPauseMenu() {
   pauseMenu = new menu("PAUSED");
-  pauseMenu.addMenuItem("Resume Snekking",new Function('gm.status = "GO"'));
-  pauseMenu.addMenuItem("Snek Settings",new Function('gm.status = "SETTINGS";'));
-  pauseMenu.addMenuItem("Quit Snekking",new Function('window.close();')); 
+  pauseMenu.addMenuItem("Resume Snekking",new Function('gm.status = "GO"'),[]);
+  pauseMenu.addMenuItem("Snek Settings",new Function('gm.status = "SETTINGS";'),[]);
+  pauseMenu.addMenuItem("Quit Snekking",new Function('window.close();'),[]); 
 }
 function setupSettingsMenu(){
   settingsMenu = new menu("SETTINGS");
-  settingsMenu.addMenuItem("Back 2 Snek Pause", new Function('gm.status = "PAUSED"'));
+  settingsMenu.addMenuItem("Back 2 Snek Pause", new Function('gm.status = "PAUSED"'),[]);
+  settingsMenu.addMenuItem("Snekky Controls", new Function('gm.status = "SETTINGS_Control";'),[]);
+}
+function setupControlsMenu(){
+  controlsMenu = new menu("CONTROLS");
+  controlsMenu.addMenuItem("Bak 2 Snek Settingz", new Function('gm.status = "SETTINGS";'),[]);
+  controlsMenu.addMenuItem("Keyboard Mode", new Function('gm.status = "SETTINGS";'), ["ARROW","VIM"]);
 }
 
 function keyPressed()
@@ -51,23 +59,18 @@ function keyPressed()
   if(gm.status == "GO"){
     playr.keyPress(keyCode);
   }
-  else if(gm.status == "PAUSED")
-  {
+  else if(gm.status == "PAUSED") {
     pauseMenu.keyPress(keyCode);
   }
-  else if(gm.status == "SETTINGS")
-  {
+  else if(gm.status == "SETTINGS") {
     settingsMenu.keyPress(keyCode);
+  }
+  else if(gm.status == "SETTINGS_Control") {
+    controlsMenu.keyPress(keyCode);
   }
   else if(gm.status == "LOST")
     gm.reset();
 }
-
-// function touchStarted() {
-//   if(gm.status == "GO"){
-//     mouseHndlr.setStart(mouseX,mouseY);
-//   }
-// }
 
 function touchEnded(){
   if(gm.status == "GO"){
@@ -94,7 +97,7 @@ function draw() {
 }
 function updateAndDrawGiblets()
 {
-  for(i=0;i<foodieGiblets.length;i++){
+  for(var i=0;i<foodieGiblets.length;i++){
     foodieGiblets[i].update();
     foodieGiblets[i].draw();
     if(foodieGiblets[i].deleteMe)
@@ -116,8 +119,15 @@ class sounds {
   }
 }
 
+class settings {
+  constructor() {
+    this.keyboardMode = "ARROW";
+    this.keyboardModes = ["ARROW", "VIM"];
+  }
+}
+
 class game {
-  constructor(gridWidth,gridHeight,cnvWidth,cnvHeight){
+  constructor(gridWidth,gridHeight,cnvWidth,cnvHeight, settings){
     this.gridWidth = gridWidth;
     this.gridHeight = gridHeight;
     this.cnvWidth = cnvWidth;
@@ -125,6 +135,7 @@ class game {
     this.status = "GO";
     this.background = [120,120,120];
     this.backgroundChangeRate = [20,20,20];
+    this.settings = settings;
   }
   get xscale() {
     return this.cnvWidth/this.gridWidth;
@@ -144,9 +155,12 @@ class game {
     if(this.status == "SETTINGS"){
       settingsMenu.draw();
     }
+    if(this.status == "SETTINGS_Control"){
+      controlsMenu.draw();
+    }
   }
   updateBackground(){
-    for(i=0;i<3;i++){
+    for(var i=0;i<3;i++){
       this.updateSingleBackgroundValue(i);
     }
     background(gm.background);
@@ -222,7 +236,7 @@ class menu {
   }
   drawBackground(){
     fill(20);
-    rect(gm.cnvWidth/4,gm.cnvHeight/5,gm.cnvWidth/2,gm.cnvHeight/2)
+    rect(gm.cnvWidth/5,gm.cnvHeight/6,gm.cnvWidth*(3/5),gm.cnvHeight*(2/3))
   }
   drawTitle(){
     fill(0,102,153);
@@ -231,9 +245,11 @@ class menu {
     text(this.title, gm.cnvWidth/2,gm.cnvHeight/3);
   }
   drawMenuItems(){
-    for(i=0;i<this.menuItems.length;i++)
+    for(var i=0;i<this.menuItems.length;i++)
     {
+      console.log(i);
       this.menuItems[i].draw(i, this.selectedItem);
+      console.log("Drew " + this.menuItems[i].textual);
     }
   }
   select(){
@@ -253,18 +269,49 @@ class menu {
 }
 
 class menuItem {
-  constructor(textual,funct)
+  constructor(textual,funct,selects)
   {
     this.textual = textual;
     this.funct = funct;
+    //this.selections = [];
+    var selected = 0;
+    if(textual == "Keyboard Mode")
+      selects = ["ARROW","VIM"];
+    if(typeof selects != 'undefined'){
+      this.selections = selects;
+    }
+    else 
+      this.selections = []
+    this.selection = selected;
   }
   draw(slot,selectedItem){
-    textSize(gm.cnvWidth/30);
+    textAlign(CENTER);
+    
+    if(this.selections.length > 0){
+      textAlign(LEFT);
+      this.drawSelections(slot);
+      textAlign(RIGHT);
+    }
     if(slot == selectedItem)
       fill(120,120,30);
     else
       fill(0,102,153);
+    textSize(gm.cnvWidth/30);
     text(this.textual, gm.cnvWidth/2, gm.cnvHeight/3 + (slot+1)*gm.cnvHeight/12);
+
+  }
+  drawSelections(slot){
+    for(var i=0;i<this.selections.length;i++){
+      var color;
+      if(i == this.selection){
+        color = [120,120,30];
+      }
+      else
+        color = [0,102,153];
+      fill(color);
+      textSize(gm.cnvWidth/40);
+      text(this.selections[i], gm.cnvWidth/2+(i+.5)*gm.cnvWidth/8,gm.cnvHeight/3 + (slot+1)*gm.cnvHeight/12);
+    }
   }
 }
 
@@ -293,7 +340,7 @@ class snake {
         this.x=this.x+this.speed;
         break;
     }
-    for(i=this.length-1;i>0;i--)
+    for(var i=this.length-1;i>0;i--)
     {
         this.tail[i] = this.tail[i-1];
     }
@@ -313,7 +360,7 @@ class snake {
   }
   draw(){
     this.drawHead('black');
-    for(i=1;i<this.tail.length;i++)
+    for(var i=1;i<this.tail.length;i++)
     {
       var colorSlot = (i+this.bodyColors.length-1)%this.bodyColors.length;
       if(i+1==this.tail.length){
@@ -414,7 +461,7 @@ class foodie {
   }
   getEaten(){
     var numberOfGiblets = floor(random()*(this.gibletQtyRange[1]-this.gibletQtyRange[0]) +this.gibletQtyRange[0]);//10-15;
-    for(i=0;i<numberOfGiblets;i++)
+    for(var i=0;i<numberOfGiblets;i++)
     {
       foodieGiblets.push(new foodieGiblet(this.x,this.y,this.color));
     }
