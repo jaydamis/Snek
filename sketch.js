@@ -5,30 +5,29 @@ var foodies;
 var pauseMenu;
 var settingsMenu;
 var audio;
-var musac;
 
 function preload() {
   audio = new sounds();
 }
 
 function setup() {
-
   gm = new game(48,24,window.innerWidth,window.innerHeight);
   createCanvas(gm.cnvWidth, gm.cnvHeight);
   frameRate(20);
 
   playr = new snake(1,1);
+
+  setupFoodies();
+  setupMenus();
+}
+
+function setupFoodies() {
   foodies = new Array(10);
   for( i=0; i<foodies.length;i++)
   {
     foodies[i] = new foodie();
   }
   foodieGiblets = [];
-
-  setupMenus();
-  // musac.stop();
-  // musac.play();
-  // musac.setVolume(.1);
 }
 
 function setupMenus() {
@@ -62,6 +61,18 @@ function keyPressed()
   }
   else if(gm.status == "LOST")
     gm.reset();
+}
+
+// function touchStarted() {
+//   if(gm.status == "GO"){
+//     mouseHndlr.setStart(mouseX,mouseY);
+//   }
+// }
+
+function touchEnded(){
+  if(gm.status == "GO"){
+    gm.mousePress(mouseX,mouseY);
+  }
 }
 
 function windowResized() {
@@ -159,6 +170,24 @@ class game {
   }
   reset(){
     setup();
+  }
+  mousePress(x, y){
+    if(this.status == "GO") {
+      playr.mousePress(this.getMousePressQuadrant(x, y));
+    }
+  }
+  getMousePressQuadrant(x, y){
+    var horizontal;
+    var vertical;
+    if(x > this.cnvWidth/2)
+      horizontal = "RIGHT";
+    else
+      horizontal = "LEFT";
+    if(y > this.cnvHeight/2)
+      vertical = "DOWN";
+    else
+      vertical = "UP";
+    return [horizontal,vertical];
   }
 }
 
@@ -355,6 +384,14 @@ class snake {
         playr.direction = "DOWN";
     if(key == 32)
       gm.status = "PAUSED";
+  }
+  mousePress(quadrant){
+    if(playr.direction == "RIGHT")
+      playr.direction = quadrant[1];
+    else if(playr.direction == "LEFT")
+      playr.direction = quadrant[1];
+    else
+      playr.direction = quadrant[0];
   }
 }
 
