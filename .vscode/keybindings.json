@@ -1,6 +1,0 @@
-
-[{
-    "key": "ctrl+shift+alt+h",
-    "command": "workbench.action.tasks.runTask",
-    "args": "CopyLocal"
-}]

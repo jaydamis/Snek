@@ -12,14 +12,9 @@
             "taskName": "CopyLocal",
             "args": ["cp -r ${workspaceRoot}/* /var/www/html/" ],
             "showOutput": "always",
-            "echoCommand": true  
-        },
-        {
-            "taskName": "CopyFar",
-            "args": ["-r", "${workspaceRoot}/*","/var/www/html/" ],
-            "showOutput": "always",
-            "echoCommand": true  
-        }   
+            "echoCommand": true,
+            "isBuildCommand": true  
+        }
     ]
 
     

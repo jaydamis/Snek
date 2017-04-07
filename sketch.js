@@ -40,7 +40,7 @@ function setupMenus() {
 }
 
 function setupPauseMenu() {
-  pauseMenu = new menu("PAUsSED");
+  pauseMenu = new menu("PAUSED");
   pauseMenu.addMenuItem("Resume Snekking", new Function('gm.status = "GO"'), []);
   pauseMenu.addMenuItem("Snek Settings", new Function('gm.status = "SETTINGS";'), []);
   pauseMenu.addMenuItem("Quit Snekking", new Function('window.close();'), []); 
@@ -227,14 +227,26 @@ class game {
   getMousePressQuadrant(x, y){
     var horizontal;
     var vertical;
-    if(x > this.cnvWidth/2)
-      horizontal = "RIGHT";
-    else
-      horizontal = "LEFT";
-    if(y > this.cnvHeight/2)
-      vertical = "DOWN";
-    else
-      vertical = "UP";
+    if(gm.settings.tapMode == "Absolute"){
+      if(x > this.cnvWidth/2)
+        horizontal = "RIGHT";
+      else
+        horizontal = "LEFT";
+      if(y > this.cnvHeight/2)
+        vertical = "DOWN";
+      else
+        vertical = "UP";
+    }
+    else{
+      if(x > playr.x*gm.xscale)
+        horizontal = "RIGHT";
+      else
+        horizontal = "LEFT";
+      if(y > playr.y*gm.yscale)
+        vertical = "DOWN";
+      else
+        vertical = "UP";
+    }
     return [horizontal,vertical];
   }
 }
