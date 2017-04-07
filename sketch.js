@@ -179,6 +179,7 @@ class game {
   }
   draw(){  
     this.drawScore();
+    this.drawPowerupBar();
     if(this.status == "LOST")
     {
       this.drawGameOver();
@@ -195,6 +196,13 @@ class game {
     if(this.status == "SETTINGS_Gameplay"){
       gameplayMenu.draw();
     }
+  }
+  drawPowerupBar(){
+    fill(0,0,0);
+    rect(0,this.cnvHeight*(59/60),this.cnvWidth,this.cnvHeight);
+    var remainingPower = playr.powerupTimeRemaining/playr.powerupTimeMax;
+    fill(255,255,255);
+    rect((1-remainingPower)*(this.cnvWidth/2),this.cnvHeight*(59/60),(remainingPower)*this.cnvWidth,this.cnvHeight);
   }
   updateBackground(){
     for(var i=0;i<3;i++){
@@ -382,10 +390,12 @@ class snake {
    this.length = 1;
    this.tail = new Array (new Array(x,y));
    this.bodyColorsBase = ['yellow','red','red','yellow','black','black'];
-   this.bodyColors = this.bodyColorsBase;
+   this.bodyColors = this.bodyColorsBase.slice();
    this.tailQueue = 0;
+
    this.powerup = "None";
    this.powerupTimeRemaining = 0;
+   this.powerupTimeMax = 80;
   }
   update(){
     switch(this.direction){
@@ -430,16 +440,24 @@ class snake {
       if(this.powerupTimeRemaining <= 0)
         this.powerup = "None";
     }
-
+    
+  }
+  addPowerupTime(time){
+    this.powerupTimeRemaining += time;
+    if(this.powerupTimeRemaining > this.powerupTimeMax)
+      this.powerupTimeRemaining = this.powerupTimeMax;
+  }
+  setBodyColors(){
     if(this.powerup == "Trippin"){
       for(var i=0;i<20;i++){
         this.bodyColors[i] = this.getRandomColor();
       }
     }
     else
-      this.bodyColors = this.bodyColorsBase;
+      this.bodyColors = this.bodyColorsBase.slice();
   }
   draw(){
+    this.setBodyColors();
     this.drawHeads();
     for(var i=1;i<this.tail.length;i++)
     {
@@ -552,9 +570,7 @@ class snake {
     return gm.settings.keyboardModeVIMLookup[key];
   }
   mousePress(quadrant){
-    if(playr.direction == "RIGHT")
-      playr.direction = quadrant[1];
-    else if(playr.direction == "LEFT")
+    if(playr.direction == "RIGHT" || playr.direction == "LEFT")
       playr.direction = quadrant[1];
     else
       playr.direction = quadrant[0];
@@ -573,6 +589,10 @@ class foodie {
     fill(this.color);
     if(this.powerup == "Hydra")
       ellipse((this.x+.5)*gm.xscale,(this.y+.5)*gm.yscale,gm.xscale,gm.yscale);
+    else if(this.powerup == "Trippin"){
+      ellipse((this.x+.5)*gm.xscale,(this.y+.5)*gm.yscale,gm.xscale/4,gm.yscale);
+      ellipse((this.x+.5)*gm.xscale,(this.y+.5)*gm.yscale,gm.xscale,gm.yscale/4);
+    }
     else
       rect(this.x*gm.xscale,this.y*gm.yscale,gm.xscale,gm.yscale);
   }
@@ -602,8 +622,9 @@ class foodie {
       }
     }
     else if(this.powerup != "Normal"){
-      playr.powerup = this.powerup;
-      playr.powerupTimeRemaining += 30;
+      if(playr.powerup == "None")
+        playr.powerup = this.powerup;
+      playr.addPowerupTime(20);
     }
     this.changeColor();
     this.powerup = this.getPowerup();
