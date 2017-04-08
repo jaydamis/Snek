@@ -38,6 +38,7 @@ function setupMenus() {
   setupSettingsMenu();
   setupControlsMenu();
   setupGameplayMenu();
+  setupColorsMenu();
 }
 
 function setupPauseMenu() {
@@ -179,6 +180,7 @@ class game {
     this.background = [120,120,120];
     this.backgroundChangeRate = [20,20,20];
     this.settings = settings;
+    this.score = 0;
   }
   get xscale() {
     return this.cnvWidth/this.gridWidth;
@@ -232,7 +234,7 @@ class game {
     textSize(gm.cnvWidth/50);
     textAlign(LEFT);
     fill(0,102,153);
-    text("SCORE: " + (playr.length - 1),0,0,gm.cnvWidth,100);
+    text("SCORE: " + (gm.score) + "    Length: " + playr.tail.length,0,0,gm.cnvWidth,100);
   }
   drawGameOver(){
       textAlign(LEFT);
@@ -241,6 +243,7 @@ class game {
   }
   reset(){
     gm.status = "GO";
+    this.score = 0;
     this.gridWidth = this.settings.getGridSize()[0];
     this.gridHeight = this.settings.getGridSize()[1];
     this.background = [120,120,120];
@@ -418,6 +421,20 @@ class snake {
     if(gm.status == "LOST")
         audio.die.play();
     this.powerDown();  
+  }
+  getPoint(){
+    gm.score++;
+    if(this.powerup == "Shrinkage"){
+      if(this.tailQueue > 0)
+        this.tailQueue--;
+      else{
+        if(playr.tail.length>1)
+          playr.tail.splice(playr.tail.length-1,1);
+          this.length--;
+      }
+    }
+    else
+      this.tailQueue++;
   }
   updateLocation(){
     switch(this.direction){
@@ -632,6 +649,9 @@ class foodie {
       ellipse((this.x+.5)*gm.xscale,(this.y+.5)*gm.yscale,gm.xscale/4,gm.yscale);
       ellipse((this.x+.5)*gm.xscale,(this.y+.5)*gm.yscale,gm.xscale,gm.yscale/4);
     }
+    else if(this.powerup == "Shrinkage"){
+      ellipse((this.x+.5)*gm.xscale,(this.y+.5)*gm.yscale,gm.xscale/2*(.5+random()),gm.yscale/2*(.5+random()));
+    }
     else
       rect(this.x*gm.xscale,this.y*gm.yscale,gm.xscale,gm.yscale);
   }
@@ -650,7 +670,7 @@ class foodie {
     gm.background = [random()*255,random()*255,random()*255];
     this.absorbPower();
     this.reset();
-    playr.tailQueue++;
+    playr.getPoint();
     audio.eat.play();
   }
   absorbPower(){
@@ -692,6 +712,8 @@ class foodie {
       return "Hydra";
     else if(rnd<15)
       return "Trippin"
+    else if(rnd<90)
+      return "Shrinkage"
     else
       return "Normal";
   }
