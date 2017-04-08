@@ -25,8 +25,8 @@ function setup() {
 }
 
 function setupFoodies() {
-  foodies = new Array(gm.settings.getFoodieQty());
-  for(var i=0; i<foodies.length;i++)
+  foodies = new Array();
+  for(var i=0; i<gm.settings.getFoodieQty();i++)
   {
     foodies[i] = new foodie();
   }
@@ -88,7 +88,7 @@ function keyPressed() {
   else if(gm.status == "SETTINGS_Gameplay"){
     gameplayMenu.keyPress(keyCode);
   }
-  else if(gm.status == "LOST")
+  else if(gm.status == "LOST" && gm.deathGiblets.length == 0)
     gm.reset();
   else if(gm.status == "SETTINGS_Colors"){
     colorsMenu.keyPress(keyCode);
@@ -119,6 +119,7 @@ function draw() {
   }
   if(gm.status == "LOST"){
     background(gm.background);
+    playr.draw();
   }
   gm.draw();
 }
@@ -763,9 +764,14 @@ class foodie {
           foodies[i].getEaten();
       }
     }
-    if(this.powerup == "Blink"){
+    else if(this.powerup == "Blink"){
       playr.addBlinkAmmo();
       playr.addPowerupTime(20);
+    }
+    else if(this.powerup == "Yum"){
+      for(var i=0;i<10;i++){
+        foodies.push(new foodie());
+      }
     }
     else if(this.powerup != "Normal"){
       if(playr.powerup == "None")
@@ -795,16 +801,16 @@ class foodie {
     var rnd = floor(random()*100);
     if(rnd < 5)
       return "SuperNom";
-    else if(rnd<5)
-      return "Hydra";
     else if(rnd<10)
-      return "Trippin";
+      return "Hydra";
     else if(rnd<15)
-      return "Shrinkage";
+      return "Trippin";
     else if(rnd<20)
-      return "Magnet";
+      return "Shrinkage";
     else if(rnd<25)
-      return "Blink";
+      return "Magnet";
+    else if(rnd<30)
+      return "Yum";
     else
       return "Normal";
   }
