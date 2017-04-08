@@ -398,6 +398,16 @@ class snake {
    this.powerupTimeMax = 80;
   }
   update(){
+    this.updateLocation();
+    this.checkOutOfBounds();
+    this.addQueuedTail();
+    this.moveSnakePieces();
+    this.checkTailCollision();
+    if(gm.status == "LOST")
+        audio.die.play();
+    this.powerDown();  
+  }
+  updateLocation(){
     switch(this.direction){
       case "UP":
         this.y=this.y-this.speed;
@@ -412,35 +422,52 @@ class snake {
         this.x=this.x+this.speed;
         break;
     }
-    if(this.tailQueue > 0){
-      this.length++;
-      this.tailQueue--;
-    }
-    for(var i=this.length-1;i>0;i--)
-    {
-        this.tail[i] = this.tail[i-1];
-    }
-    
-    this.tail[0] = new Array(this.x,this.y);
-    if(this.x < 0 || this.y < 0 || this.x > gm.gridWidth-1 || this.y > gm.gridHeight-1)
-    {
-      gm.status = "LOST";
-      audio.die.play();
-    }
-    for(i=1;i<this.tail.length;i++)
-    {
-      if(this.tail[0][0]==this.tail[i][0] && this.tail[0][1] == this.tail[i][1])
-        gm.status = "LOST";
-    }
-    if(gm.status == "LOST")
-        audio.die.play();
-
+  }
+  powerDown(){
     if(this.powerup != "None"){
       this.powerupTimeRemaining--;
       if(this.powerupTimeRemaining <= 0)
         this.powerup = "None";
     }
-    
+  }
+  moveSnakePieces(){
+    for(var i=this.length-1;i>0;i--)
+    {
+        this.tail[i] = this.tail[i-1];
+    }
+    this.tail[0] = new Array(this.x,this.y);
+  }
+  addQueuedTail(){
+    if(this.tailQueue > 0){
+      this.length++;
+      this.tailQueue--;
+    }
+  }
+  checkOutOfBounds(){
+    if(this.x < 0 || this.y < 0 || this.x > gm.gridWidth-1 || this.y > gm.gridHeight-1)
+    {
+      if(this.powerup != "Trippin")
+        gm.status = "LOST";
+      else{
+        if(this.x<0)
+          this.x = gm.gridWidth - 1;
+        else if(this.y<0)
+          this.y = gm.gridHeight - 1;
+        else if(this.x > gm.gridWidth - 1)
+          this.x = 0;
+        else
+          this.y = 0;
+      }
+    }
+  }
+  checkTailCollision(){
+    if(this.powerup != "Trippin"){
+      for(var i=1;i<this.tail.length;i++)
+      {
+        if(this.tail[0][0]==this.tail[i][0] && this.tail[0][1] == this.tail[i][1])
+          gm.status = "LOST";
+      }
+    }
   }
   addPowerupTime(time){
     this.powerupTimeRemaining += time;
