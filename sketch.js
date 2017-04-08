@@ -6,6 +6,7 @@ var pauseMenu;
 var settingsMenu;
 var controlsMenu;
 var gameplayMenu;
+var colorsMenu;
 var audio;
 
 function preload() {
@@ -49,6 +50,7 @@ function setupSettingsMenu(){
   settingsMenu = new menu("SETTINGS");
   settingsMenu.addMenuItem("Back 2 Snek Pause", new Function('gm.status = "PAUSED"'), []);
   settingsMenu.addMenuItem("Snek Gameplay", new Function('gm.status = "SETTINGS_Gameplay"'), []);
+  settingsMenu.addMenuItem("Snek Colurz", new Function('gm.status = "SETTINGS_Colors";'),[]);
   settingsMenu.addMenuItem("Snekky Controls", new Function('gm.status = "SETTINGS_Control";'), []);
 }
 function setupControlsMenu(){
@@ -63,6 +65,10 @@ function setupGameplayMenu(){
   gameplayMenu.addMenuItem("Grid Size", new Function('this.selectPress("gridSize");'), gm.settings.gridSizes);
   gameplayMenu.addMenuItem("Foodie Qty", new Function('this.selectPress("foodieQty");'), gm.settings.foodieQtys);
   gameplayMenu.addMenuItem("Giblet Quantity", new Function('this.selectPress("gibletQty");'), gm.settings.gibletQtys);
+}
+function setupColorsMenu(){
+  colorsMenu = new menu("Snek Colurz");
+  colorsMenu.addMenuItem("Back to Settings", new Function('gm.status = "SETTINGS";'), []);
 }
 
 function keyPressed() {
@@ -83,6 +89,9 @@ function keyPressed() {
   }
   else if(gm.status == "LOST")
     gm.reset();
+  else if(gm.status == "SETTINGS_Colors"){
+    colorsMenu.keyPress(keyCode);
+  }
 }
 
 function touchEnded(){
@@ -175,7 +184,7 @@ class game {
     return this.cnvWidth/this.gridWidth;
   }
   get yscale() {
-    return this.cnvHeight/this.gridHeight;
+    return this.cnvHeight*(59/60)/this.gridHeight;
   }
   draw(){  
     this.drawScore();
@@ -195,6 +204,9 @@ class game {
     }
     if(this.status == "SETTINGS_Gameplay"){
       gameplayMenu.draw();
+    }
+    if(this.status == "SETTINGS_Colors"){
+      colorsMenu.draw();
     }
   }
   drawPowerupBar(){
