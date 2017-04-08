@@ -634,14 +634,14 @@ class foodie {
       this.changeColor()
   }
   getEaten(){
-    var numberOfGiblets = floor(random()*(this.gibletQtyRange[1]-this.gibletQtyRange[0]) +this.gibletQtyRange[0]);//10-15;
-    for(var i=0;i<numberOfGiblets;i++)
-    {
-      foodieGiblets.push(new foodieGiblet(this.x,this.y,this.color));
-    }
-    this.x = (floor(random()*gm.gridWidth));
-    this.y = (floor(random()*gm.gridHeight));
+    this.spawnGiblets();
     gm.background = [random()*255,random()*255,random()*255];
+    this.absorbPower();
+    this.reset();
+    playr.tailQueue++;
+    audio.eat.play();
+  }
+  absorbPower(){
     if(this.powerup == "SuperNom"){
       for(var i=0;i<foodies.length;i++){
         if(foodies[i].powerup == "Normal")
@@ -653,10 +653,21 @@ class foodie {
         playr.powerup = this.powerup;
       playr.addPowerupTime(20);
     }
+    else
+      playr.addPowerupTime(3);
+  }
+  reset(){
+    this.x = (floor(random()*gm.gridWidth));
+    this.y = (floor(random()*gm.gridHeight));
     this.changeColor();
     this.powerup = this.getPowerup();
-    playr.tailQueue++;
-    audio.eat.play();
+  }
+  spawnGiblets(){
+    var numberOfGiblets = floor(random()*(this.gibletQtyRange[1]-this.gibletQtyRange[0]) +this.gibletQtyRange[0]);//10-15;
+    for(var i=0;i<numberOfGiblets;i++)
+    {
+      foodieGiblets.push(new foodieGiblet(this.x,this.y,this.color));
+    }
   }
   changeColor(){
     this.color = [random()*255,random()*255,random()*255];
@@ -665,9 +676,9 @@ class foodie {
     var rnd = floor(random()*100);
     if(rnd < 5)
       return "SuperNom";
-    else if(rnd<15)
+    else if(rnd<10)
       return "Hydra";
-    else if(rnd<100)
+    else if(rnd<15)
       return "Trippin"
     else
       return "Normal";
