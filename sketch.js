@@ -108,6 +108,7 @@ function windowResized() {
 }
 
 function draw() {
+  
   if(gm.status == "GO")
   {
     gm.updateBackground();
@@ -115,6 +116,9 @@ function draw() {
     updateAndDrawFoodies();
     playr.draw();
     updateAndDrawGiblets();
+  }
+  if(gm.status == "LOST"){
+    background(gm.background);
   }
   gm.draw();
 }
@@ -181,6 +185,7 @@ class game {
     this.backgroundChangeRate = [20,20,20];
     this.settings = settings;
     this.score = 0;
+    this.deathGiblets = []
   }
   get xscale() {
     return this.cnvWidth/this.gridWidth;
@@ -191,9 +196,11 @@ class game {
   draw(){  
     this.drawScore();
     this.drawPowerupBar();
+    this.drawBlinkAmmo();
     if(this.status == "LOST")
     {
       this.drawGameOver();
+      this.drawSnakeSplosion();
     }
     if(this.status == "PAUSED"){
       pauseMenu.draw();
@@ -209,6 +216,32 @@ class game {
     }
     if(this.status == "SETTINGS_Colors"){
       colorsMenu.draw();
+    }
+  }
+  drawSnakeSplosion(){
+    if(playr.tail.length > 0){
+      var pieceOfTail;
+      pieceOfTail = playr.tail.splice(playr.tail.length-1,1);
+      this.spawnGiblets(pieceOfTail[0]);
+    }
+    for(var i=0;i<this.deathGiblets.length;i++){
+      this.deathGiblets[i].update();
+      this.deathGiblets[i].draw();
+      if(this.deathGiblets[i].deleteMe)
+        this.deathGiblets.splice(i,1);
+    }
+  }
+  spawnGiblets(pieceOfTail){
+    var numberOfGiblets = floor(random()*(gm.settings.getGibletQty()[1]-gm.settings.getGibletQty()[0]) +gm.settings.getGibletQty()[0]);//10-15;
+    for(var i=0;i<numberOfGiblets;i++)
+    {
+      this.deathGiblets.push(new foodieGiblet(pieceOfTail[0],pieceOfTail[1],'black'));
+    }
+  }
+  drawBlinkAmmo(){
+    fill(120,0,120);
+    for(var i=0;i<playr.blinkAmmo;i++){
+      rect(this.cnvWidth*((59-i)/60),this.cnvHeight*(57/60),this.cnvWidth/120,this.cnvHeight*(3/60));
     }
   }
   drawPowerupBar(){
@@ -409,6 +442,8 @@ class snake {
    this.tailQueue = 0;
 
    this.powerup = "None";
+   this.blinkAmmo = 3;
+   this.blinkAmmoMax = 3;
    this.powerupTimeRemaining = 0;
    this.powerupTimeMax = 80;
   }
@@ -421,6 +456,11 @@ class snake {
     if(gm.status == "LOST")
         audio.die.play();
     this.powerDown();  
+  }
+  draw(){
+    this.setBodyColors();
+    this.drawHeads();
+    this.drawBodyAndTail();
   }
   getPoint(){
     gm.score++;
@@ -512,9 +552,8 @@ class snake {
     else
       this.bodyColors = this.bodyColorsBase.slice();
   }
-  draw(){
-    this.setBodyColors();
-    this.drawHeads();
+
+  drawBodyAndTail(){
     for(var i=1;i<this.tail.length;i++)
     {
       var colorSlot = (i+this.bodyColors.length-1)%this.bodyColors.length;
@@ -619,6 +658,8 @@ class snake {
     if(key == DOWN_ARROW)
       if(playr.direction != "UP")
         playr.direction = "DOWN";
+    if(key == 16) //LeftShift
+      this.blink(4);
     if(key == 32)
       gm.status = "PAUSED";
   }
@@ -630,6 +671,24 @@ class snake {
       playr.direction = quadrant[1];
     else
       playr.direction = quadrant[0];
+  }
+  addBlinkAmmo(){
+    this.blinkAmmo++;
+    if(this.blinkAmmo > this.blinkAmmoMax)
+      this.blinkAmmo = this.blinkAmmoMax;
+  }
+  blink(distance){
+    if(this.blinkAmmo > 0){
+      if(this.direction == "RIGHT")
+        this.x += distance;
+      if(this.direction == "LEFT")
+        this.x -= distance;
+      if(this.direction == "DOWN")
+        this.y += distance;
+      if(this.direction == "UP")
+        this.y -= distance;
+      this.blinkAmmo--;
+    }
   }
 }
 
@@ -652,18 +711,42 @@ class foodie {
     else if(this.powerup == "Shrinkage"){
       ellipse((this.x+.5)*gm.xscale,(this.y+.5)*gm.yscale,gm.xscale/2*(.5+random()),gm.yscale/2*(.5+random()));
     }
+    else if(this.powerup == "Magnet"){
+      ellipse((this.x+.4)*gm.xscale,(this.y+.5)*gm.yscale,gm.xscale/5,gm.yscale);
+      ellipse((this.x+.6)*gm.xscale,(this.y+.5)*gm.yscale,gm.xscale/5,gm.yscale);
+    }
+    else if(this.powerup == "Blink"){
+      triangle((this.x)*gm.xscale,this.y*gm.yscale,(this.x+.5)*gm.xscale,(this.y+1)*gm.yscale,(this.x+1)*gm.xscale,this.y*gm.yscale);
+    }
     else
       rect(this.x*gm.xscale,this.y*gm.yscale,gm.xscale,gm.yscale);
   }
   update(){
+    this.updateLocation();
+    this.checkForEating();
+    if(this.powerup == "SuperNom")
+      this.changeColor()
+  }
+  updateLocation(){
+    if(playr.powerup == "Magnet" && this.powerup == "Normal"){
+      var xdiff = playr.x - this.x;
+      var ydiff = playr.y - this.y;
+      if(ydiff != 0 && xdiff != 0){
+        if(Math.abs(xdiff) > Math.abs(ydiff)){
+          this.x = this.x + (xdiff/Math.abs(xdiff));
+        }
+        else
+          this.y = this.y + (ydiff/Math.abs(ydiff));
+      }
+    }
+  }
+  checkForEating(){
     var heads = playr.getHeadLocations();
     for(var i=0;i<heads.length;i++){
       if(this.x == heads[i][0] && this.y == heads[i][1]){
         this.getEaten();
       }
     }
-    if(this.powerup == "SuperNom")
-      this.changeColor()
   }
   getEaten(){
     this.spawnGiblets();
@@ -679,6 +762,10 @@ class foodie {
         if(foodies[i].powerup == "Normal")
           foodies[i].getEaten();
       }
+    }
+    if(this.powerup == "Blink"){
+      playr.addBlinkAmmo();
+      playr.addPowerupTime(20);
     }
     else if(this.powerup != "Normal"){
       if(playr.powerup == "None")
@@ -708,12 +795,16 @@ class foodie {
     var rnd = floor(random()*100);
     if(rnd < 5)
       return "SuperNom";
-    else if(rnd<10)
+    else if(rnd<5)
       return "Hydra";
+    else if(rnd<10)
+      return "Trippin";
     else if(rnd<15)
-      return "Trippin"
-    else if(rnd<90)
-      return "Shrinkage"
+      return "Shrinkage";
+    else if(rnd<20)
+      return "Magnet";
+    else if(rnd<25)
+      return "Blink";
     else
       return "Normal";
   }
