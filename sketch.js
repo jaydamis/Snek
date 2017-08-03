@@ -95,7 +95,7 @@ function keyPressed() {
   }
 }
 
-function touchEnded(){
+function touchStarted(){
   if(gm.status == "GO"){
     gm.mousePress(mouseX,mouseY);
   }
